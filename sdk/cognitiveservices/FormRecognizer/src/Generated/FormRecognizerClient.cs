@@ -49,7 +49,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// Supported Cognitive Services endpoints (protocol and hostname, for example:
         /// https://westus2.api.cognitive.microsoft.com).
         /// </summary>
-        private string Endpoint { get; set; }
+        public string Endpoint { get; set; }
 
         /// <summary>
         /// Subscription credentials which uniquely identify client subscription.
@@ -106,7 +106,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        private FormRecognizerClient(ServiceClientCredentials credentials, params DelegatingHandler[] handlers) : this(handlers)
+        public FormRecognizerClient(ServiceClientCredentials credentials, params DelegatingHandler[] handlers) : this(handlers)
         {
             if (credentials == null)
             {
@@ -133,7 +133,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        private FormRecognizerClient(ServiceClientCredentials credentials, HttpClient httpClient, bool disposeHttpClient) : this(httpClient, disposeHttpClient)
+        public FormRecognizerClient(ServiceClientCredentials credentials, HttpClient httpClient, bool disposeHttpClient) : this(httpClient, disposeHttpClient)
         {
             if (credentials == null)
             {
@@ -161,7 +161,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        private FormRecognizerClient(ServiceClientCredentials credentials, HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : this(rootHandler, handlers)
+        public FormRecognizerClient(ServiceClientCredentials credentials, HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : this(rootHandler, handlers)
         {
             if (credentials == null)
             {

@@ -41,6 +41,8 @@ ls .\Generated\FormRecognizerClient.cs | foreach {
     $newContent = $newContent -replace 'public', 'private'
     $newContent = $newContent -replace 'object fileStream = default\(object\),', 'object fileStream = default(object), string contentType = null,'
     $newContent = $newContent -replace 'using System.Threading.Tasks;', $appendUsing
+    $newContent = $newContent -replace 'private FormRecognizerClient', 'public FormRecognizerClient'
+    $newContent = $newContent -replace 'private string Endpoint', 'public string Endpoint'
     $newContent = $newContent -replace 'private JsonSerializerSettings', 'public JsonSerializerSettings'
     $newContent = $newContent -replace 'private ServiceClientCredentials', 'public ServiceClientCredentials'
     $newContent = $newContent -replace 'private partial class FormRecognizerClient', 'public partial class FormRecognizerClient'
