@@ -3,37 +3,31 @@
 namespace Microsoft.Azure.CognitiveServices.FormRecognizer
 {
     using Microsoft.Rest;
-    using Newtonsoft.Json;
+    using Models;
+    using System.IO;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System;
 
     /// <summary>
-    /// Extracts information from forms and images into structured data.
+    /// Customized interface
     /// </summary>
     public partial interface IFormRecognizerClient : System.IDisposable
     {
-        /// <summary>
-        /// The base URI of the service.
-        /// </summary>
+        Task<AnalyzeReceiptAsyncHeaders> StartAnalyzeReceiptAsync(Uri uri, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AnalyzeReceiptAsyncHeaders> StartAnalyzeReceiptAsync(Stream fileStream, AnalysisContentType contentType, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AnalyzeOperationResult> AnalyzeReceiptAsync(Uri uri, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AnalyzeOperationResult> AnalyzeReceiptAsync(Stream fileStream, AnalysisContentType contentTyep, CancellationToken cancellationToken = default(CancellationToken));        
+        Task<AnalyzeOperationResult> GetAnalyzeReceiptResultAsync(System.Guid resultId, CancellationToken cancellationToken = default(CancellationToken));
 
-        /// <summary>
-        /// Gets or sets json serialization settings.
-        /// </summary>
-        JsonSerializerSettings SerializationSettings { get; }
+        Task<AnalyzeLayoutAsyncHeaders> StartAnalyzeLayoutAsync(string language, Uri uri, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AnalyzeLayoutAsyncHeaders> StartAnalyzeLayoutAsync(string language, Stream fileStream, AnalysisContentType contentType, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AnalyzeOperationResult> AnalyzeLayoutAsync(string language, Uri uri, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AnalyzeOperationResult> AnalyzeLayoutAsync(string language, Stream fileStream, AnalysisContentType contentType, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AnalyzeOperationResult> GetAnalyzeLayoutResultAsync(System.Guid resultId, CancellationToken cancellationToken = default(CancellationToken));
 
-        /// <summary>
-        /// Gets or sets json deserialization settings.
-        /// </summary>
-        JsonSerializerSettings DeserializationSettings { get; }
 
-        /// <summary>
-        /// Supported Cognitive Services endpoints (protocol and hostname, for
-        /// example: https://westus2.api.cognitive.microsoft.com).
-        /// </summary>
-        string Endpoint { get; set; }
 
-        /// <summary>
-        /// Subscription credentials which uniquely identify client
-        /// subscription.
-        /// </summary>
-        ServiceClientCredentials Credentials { get; }
     }
 }
