@@ -89,6 +89,16 @@ namespace FormRecognizerSDK.Tests
             }
         }
 
+        [Fact]
+        public void AnalyzeReceiptAsync_APIM_UriExpectedResult()
+        {
+            var expectedResult = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<AnalyzeResult>(File.ReadAllText(GetTestImagePath("Receipt_003_934.json"))));
+            using (var client = new FormRecognizerClient("184654c847d54432b8301a4b76f63045", @"https://westus2.ppe.cognitiveservices.azure.com"))
+            {
+                var streamResult = client.AnalyzeReceiptAsync(new Uri(@"https://ielanguages.com/real/French/images/receipt_jpg.jpg") ).Result.AnalyzeResult;
+                var serializedResult = JsonConvert.SerializeObject(streamResult);                                
+            }
+        }
 
     }
 }
