@@ -13,43 +13,75 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
     /// </summary>
     public static partial class FormRecognizerClientExtensions
     {
-        public enum AnalyzeType { Layout, Receipt };
-
-        public static Guid GetGuid(string uri, int order = 1)
+        public static Guid GetOperationId(string uri)
         {
-            var match = Regex.Match(uri, @"([0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12})");
-            if (match.Success)
+            if (string.IsNullOrEmpty(uri))
             {
-                return new Guid(match.Groups[order].ToString());
+                throw new ArgumentNullException(nameof(uri));
             }
-            throw new ArgumentException("Invalid URL.");
+
+            var parts = uri.Trim(new[] { '/' }).Split('/');
+            if (parts.Length == 0)
+            {
+                throw new ArgumentException("Invalid Operation URL.");
+            }
+
+            Guid operationId;
+            var operationIdText = parts[parts.Length - 1];
+            if (!Guid.TryParse(operationIdText, out operationId))
+            {
+                throw new ArgumentException("Invalid Operation URL.");
+            }
+
+            return operationId;
         }
 
-        public static async Task<AnalyzeOperationResult> PollingResultAsync(this IFormRecognizerClient operations, Guid resultid, AnalyzeType type, int retryTimes = 5, CancellationToken cancellationToken = default(CancellationToken))
+        private static async Task<AnalyzeOperationResult> WaitForOperation(this IFormRecognizerClient operations, Func<CancellationToken, Task<AnalyzeOperationResult>> resultFunc, CancellationToken cancellationToken = default(CancellationToken))
         {
-            int retryTimeframe = 1;
-            for (int retryCount = retryTimes; retryCount > 0; retryCount--)
+            AnalyzeOperationResult result = null;
+            do
             {
-                AnalyzeOperationResult body;
-                switch (type)
+                cancellationToken.ThrowIfCancellationRequested();
+                result = await resultFunc(cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (result.Status == OperationStatus.NotStarted || result.Status == OperationStatus.Running)
                 {
-                    case (AnalyzeType.Layout):
-                        body = await GetAnalyzeLayoutResultAsync(operations, resultid, cancellationToken);
-                        break;
-                    case (AnalyzeType.Receipt):
-                        body = await GetAnalyzeReceiptResultAsync(operations, resultid, cancellationToken);
-                        break;
-                    default:
-                        throw new ArgumentException("Not supported analyze type");
+                    await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
                 }
-                if (body.Status.ToSerializedValue() == "succeeded")
-                {
-                    return body;
-                }
-                await Task.Delay(TimeSpan.FromSeconds(retryTimeframe));
-                retryTimeframe *= 2;
             }
-            throw new ErrorResponseException($"Guid : {resultid.ToString()}, Timeout.");
+            while (result.Status == OperationStatus.NotStarted || result.Status == OperationStatus.Running);
+
+            if (result == null || result.Status != OperationStatus.Succeeded)
+            {
+                var status = result == null ? "Unknown Error" : result.Status.ToString();
+                throw new ErrorResponseException(status);
+            }
+
+            return result;
+        }
+
+        private static async Task<Model> WaitForTraining(this IFormRecognizerClient operations, Func<CancellationToken, Task<Model>> resultFunc, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Model result = null;
+            do
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                result = await resultFunc(cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (result.ModelInfo.Status == ModelStatus.Creating)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+                }
+            }
+            while (result.ModelInfo.Status == ModelStatus.Creating);
+
+            if (result == null || result.ModelInfo.Status != ModelStatus.Ready)
+            {
+                var status = result == null ? "Unknown Error" : result.ModelInfo.Status.ToString();
+                throw new ErrorResponseException(status);
+            }
+
+            return result;
         }
     }
 }

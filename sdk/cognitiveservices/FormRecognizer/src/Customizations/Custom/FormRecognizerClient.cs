@@ -190,11 +190,14 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         }
 
         /// <summary>
-        /// List Custom Models
+        /// List Custom Models.
         /// </summary>
         /// <remarks>
-        /// Get information about all custom models
+        /// Get information about all custom models.
         /// </remarks>
+        /// <param name='nextLink'>
+        /// Provide the next link from a previous request to fetch the next page.
+        /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
         /// </param>
@@ -216,31 +219,19 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public Task<HttpOperationResponse<ModelsModel>> GetCustomModelsWithHttpMessagesAsync(Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<HttpOperationResponse<ModelsModel>> GetCustomModelsWithHttpMessagesAsync(string nextLink = null, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return GetCustomModelsWithHttpMessagesAsync(null, customHeaders, cancellationToken);
-        }
-
-        public async Task<IEnumerable<ModelInfo>> ListCustomModelsWithHttpMessagesAsync(Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var models = new List<ModelInfo>();
-            string nextLinkToken = null;
-            do
+            var queryParameters = new List<(string, string)>();
+            var nextLinkToken = GetNextLinkToken(nextLink);
+            if (!string.IsNullOrEmpty(nextLinkToken))
             {
-                var qp = new List<(string, string)> { ("nextLink", nextLinkToken) };
-                var resp = await GetCustomModelsWithHttpMessagesAsync(qp, customHeaders, cancellationToken);
-                models.AddRange(resp.Body.ModelList);
-                if (!string.IsNullOrEmpty(resp.Body.NextLink))
-                {
-                    nextLinkToken = GetNextLinkToken(resp.Body.NextLink);
-                }
+                queryParameters.Add(("nextLink", nextLinkToken));
             }
-            while (!string.IsNullOrEmpty(nextLinkToken));
-            return models;
+            return GetCustomModelsWithHttpMessagesAsync(queryParameters, customHeaders, cancellationToken);
         }
 
         /// <summary>
-        /// List Custom Models
+        /// Get summary of custom models.
         /// </summary>
         /// <remarks>
         /// Get information about all custom models
@@ -532,7 +523,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
             HttpStatusCode _statusCode = _httpResponse.StatusCode;
             cancellationToken.ThrowIfCancellationRequested();
             string _responseContent = null;
-            if ((int)_statusCode != 200)
+            if ((int)_statusCode != 204)
             {
                 var ex = new ErrorResponseException(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
                 try
@@ -573,7 +564,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         }
 
         /// <summary>
-        /// Analyze Form
+        /// Analyze Form from URI.
         /// </summary>
         /// <remarks>
         /// Extract key-value pairs, tables, and semantic values from a given document.
@@ -585,11 +576,11 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// <param name='modelId'>
         /// Model identifier.
         /// </param>
-        /// <param name='includeTextDetails'>
-        /// Include text lines and element references in the result.
-        /// </param>
         /// <param name='uri'>
         /// URL to analyze.
+        /// </param>
+        /// <param name='includeTextDetails'>
+        /// Include text lines and element references in the result.
         /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
@@ -617,7 +608,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
             {
                 queryParameters = new List<(string, string)>
                 {
-                    ("includeTextDetails", includeTextDetails.Value.ToString()),
+                    ("includeTextDetails", includeTextDetails.Value.ToString().ToLowerInvariant()),
                 };
             }
             return AnalyzeWithHttpMessagesAsync<AnalyzeWithCustomModelHeaders>(
@@ -637,7 +628,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         }
 
         /// <summary>
-        /// Analyze Form
+        /// Analyze Form from stream
         /// </summary>
         /// <remarks>
         /// Extract key-value pairs, tables, and semantic values from a given document.
@@ -649,11 +640,14 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// <param name='modelId'>
         /// Model identifier.
         /// </param>
-        /// <param name='includeTextDetails'>
-        /// Include text lines and element references in the result.
-        /// </param>
         /// <param name='fileStream'>
         /// .json, .pdf, .jpg, .png or .tiff type file stream.
+        /// </param>
+        /// <param name='contentType'>
+        /// Content type of the stream.
+        /// </param>
+        /// <param name='includeTextDetails'>
+        /// Include text lines and element references in the result.
         /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
@@ -681,7 +675,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
             {
                 queryParameters = new List<(string, string)>
                 {
-                    ("includeTextDetails", includeTextDetails.Value.ToString()),
+                    ("includeTextDetails", includeTextDetails.Value.ToString().ToLowerInvariant()),
                 };
             }
             return AnalyzeWithHttpMessagesAsync<AnalyzeWithCustomModelHeaders>(
@@ -694,70 +688,6 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
                 null,
                 fileStream,
                 null,
-                contentType.ToString(),
-                queryParameters,
-                customHeaders,
-                cancellationToken);
-        }
-
-        /// <summary>
-        /// Analyze Form
-        /// </summary>
-        /// <remarks>
-        /// Extract key-value pairs, tables, and semantic values from a given document.
-        /// The input document must be of one of the supported content types -
-        /// 'application/pdf', 'image/jpeg', 'image/png' or 'image/tiff'.
-        /// Alternatively, use 'application/json' type to specify the location (Uri or
-        /// local path) of the document to be analyzed.
-        /// </remarks>
-        /// <param name='modelId'>
-        /// Model identifier.
-        /// </param>
-        /// <param name='includeTextDetails'>
-        /// Include text lines and element references in the result.
-        /// </param>
-        /// <param name='byteArray'>
-        /// .json, .pdf, .jpg, .png or .tiff type byte array.
-        /// </param>
-        /// <param name='customHeaders'>
-        /// Headers that will be added to request.
-        /// </param>
-        /// <param name='cancellationToken'>
-        /// The cancellation token.
-        /// </param>
-        /// <exception cref="ErrorResponseException">
-        /// Thrown when the operation returned an invalid status code
-        /// </exception>
-        /// <exception cref="ValidationException">
-        /// Thrown when a required parameter is null
-        /// </exception>
-        /// <exception cref="System.ArgumentNullException">
-        /// Thrown when a required parameter is null
-        /// </exception>
-        /// <return>
-        /// A response object containing the response body and response headers.
-        /// </return>
-        public Task<HttpOperationHeaderResponse<AnalyzeWithCustomModelHeaders>> AnalyzeWithCustomModelWithHttpMessagesAsync(Guid modelId, byte[] byteArray, AnalysisContentType contentType, bool? includeTextDetails = false, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            List<(string, string)> queryParameters = null;
-
-            if (includeTextDetails.HasValue)
-            {
-                queryParameters = new List<(string, string)>
-                {
-                    ("includeTextDetails", includeTextDetails.Value.ToString()),
-                };
-            }
-            return AnalyzeWithHttpMessagesAsync<AnalyzeWithCustomModelHeaders>(
-                Trace_AnalyzeCustom,
-                "custom/models/{modelId}/analyze",
-                new Dictionary<string, string>
-                {
-                    { "modelId", modelId.ToString() },
-                },
-                null,
-                null,
-                byteArray,
                 contentType.ToString(),
                 queryParameters,
                 customHeaders,
@@ -952,8 +882,15 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
 
         private static string GetNextLinkToken(string nextLink)
         {
-            var parts = nextLink.Split(new[] { "nextLink=" }, StringSplitOptions.None);
-            return parts.Length == 2 ? parts[1] : null;
+            if (string.IsNullOrEmpty(nextLink))
+            {
+                return null;
+            }
+            else
+            {
+                var parts = nextLink.Split(new[] { "nextLink=" }, StringSplitOptions.None);
+                return parts.Length == 2 ? parts[1] : null;
+            }
         }
     }
 }

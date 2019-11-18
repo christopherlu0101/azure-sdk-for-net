@@ -56,13 +56,13 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<HttpOperationResponse<ModelsModel>> GetCustomModelsWithHttpMessagesAsync(Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse<ModelsModel>> GetCustomModelsWithHttpMessagesAsync(string nextLink = null, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
-        /// List Custom Model summary.
+        /// Get summary of custom models.
         /// </summary>
         /// <remarks>
-        /// Get information about all custom models
+        /// Get information about all custom models.
         /// </remarks>
         /// <param name='customHeaders'>
         /// The headers that will be added to request.
@@ -111,7 +111,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         Task<HttpOperationResponse> DeleteCustomModelWithHttpMessagesAsync(System.Guid modelId, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
-        /// Analyze Form
+        /// Analyze Form from stream
         /// </summary>
         /// <remarks>
         /// Extract key-value pairs, tables, and semantic values from a given
@@ -141,7 +141,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         Task<HttpOperationHeaderResponse<AnalyzeWithCustomModelHeaders>> AnalyzeWithCustomModelWithHttpMessagesAsync(System.Guid modelId, Stream fileStream, AnalysisContentType contentType, bool? includeTextDetails = false, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
-        /// Analyze Form
+        /// Analyze Form from URI
         /// </summary>
         /// <remarks>
         /// Extract key-value pairs, tables, and semantic values from a given
@@ -166,36 +166,6 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
         /// The cancellation token.
         /// </param>
         Task<HttpOperationHeaderResponse<AnalyzeWithCustomModelHeaders>> AnalyzeWithCustomModelWithHttpMessagesAsync(System.Guid modelId, Uri uri, bool? includeTextDetails = false, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
-
-        /// <summary>
-        /// Analyze Form
-        /// </summary>
-        /// <remarks>
-        /// Extract key-value pairs, tables, and semantic values from a given
-        /// document. The input document must be of one of the supported
-        /// content types - 'application/pdf', 'image/jpeg', 'image/png' or
-        /// 'image/tiff'. Alternatively, use 'application/json' type to specify
-        /// the location (Uri or local path) of the document to be analyzed.
-        /// </remarks>
-        /// <param name='modelId'>
-        /// Model identifier.
-        /// </param>
-        /// <param name='byteArray'>
-        /// Bytes to analyze.
-        /// </param>
-        /// <param name='contentType'>
-        /// Content-Type of the byte array.
-        /// </param>
-        /// <param name='includeTextDetails'>
-        /// Include text lines and element references in the result.
-        /// </param>
-        /// <param name='customHeaders'>
-        /// The headers that will be added to request.
-        /// </param>
-        /// <param name='cancellationToken'>
-        /// The cancellation token.
-        /// </param>
-        Task<HttpOperationHeaderResponse<AnalyzeWithCustomModelHeaders>> AnalyzeWithCustomModelWithHttpMessagesAsync(System.Guid modelId, byte[] byteArray, AnalysisContentType contentType, bool? includeTextDetails = false, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Get Analyze Form Result

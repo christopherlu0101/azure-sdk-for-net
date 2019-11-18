@@ -1,0 +1,48 @@
+{
+  "Entries": [
+    {
+      "RequestUri": "/formrecognizer/v2.0-preview/custom/models/f39efed8-edaf-4e0f-af3d-1ca1119368b3/analyze?includeTextDetails=true",
+      "EncodedRequestUri": "L2Zvcm1yZWNvZ25pemVyL3YyLjAtcHJldmlldy9jdXN0b20vbW9kZWxzL2YzOWVmZWQ4LWVkYWYtNGUwZi1hZjNkLTFjYTExMTkzNjhiMy9hbmFseXplP2luY2x1ZGVUZXh0RGV0YWlscz10cnVl",
+      "RequestMethod": "POST",
+      "RequestBody": "{\n  \"source\": \"https://example.org/fake-document.pdf\"\n}",
+      "RequestHeaders": {
+        "Expect": [
+          "100-continue"
+        ],
+        "Ocp-Apim-Subscription-Key": [
+          "00000000000000000000000000000000"
+        ],
+        "User-Agent": [
+          "FxVersion/4.700.19.46205",
+          "OSName/MacOs",
+          "OSVersion/Darwin.19.0.0.Darwin.Kernel.Version.19.0.0.Thu.Oct.17.16.17.15.PDT.2019.root.xnu.6153.41.3.29RELEASE.X86.64",
+          "Microsoft.Azure.CognitiveServices.FormRecognizer.FormRecognizerClient/2.0.0.0"
+        ],
+        "Content-Type": [
+          "application/json; charset=utf-8"
+        ],
+        "Content-Length": [
+          "49"
+        ]
+      },
+      "ResponseHeaders": {
+        "Date": [
+          "Fri, 15 Nov 2019 15:58:26 GMT"
+        ],
+        "Server": [
+          "Kestrel"
+        ],
+        "Operation-Location": [
+          "https://example.org/formrecognizer/v2.0-preview/custom/models/f39efed8-edaf-4e0f-af3d-1ca1119368b3/analyzeresults/62be37bf-cd35-4dee-af5b-72a39f966ff4"
+        ],
+        "Content-Length": [
+          "0"
+        ]
+      },
+      "ResponseBody": "",
+      "StatusCode": 202
+    }
+  ],
+  "Names": {},
+  "Variables": {}
+}

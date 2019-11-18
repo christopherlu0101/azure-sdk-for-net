@@ -37,7 +37,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
         /// <param name="errors">List of errors.</param>
         /// <param name="status">Status of the training operation. Possible
         /// values include: 'succeeded', 'partiallySucceeded', 'failed'</param>
-        public TrainingDocumentInfo(string documentName, int pages, IList<string> errors, TrainStatus status)
+        public TrainingDocumentInfo(string documentName, int pages, IList<ErrorInformation> errors, TrainStatus status)
         {
             DocumentName = documentName;
             Pages = pages;
@@ -67,7 +67,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
         /// Gets or sets list of errors.
         /// </summary>
         [JsonProperty(PropertyName = "errors")]
-        public IList<string> Errors { get; set; }
+        public IList<ErrorInformation> Errors { get; set; }
 
         /// <summary>
         /// Gets or sets status of the training operation. Possible values

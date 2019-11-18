@@ -1,0 +1,144 @@
+{
+  "Entries": [
+    {
+      "RequestUri": "/formrecognizer/v2.0-preview/custom/models",
+      "EncodedRequestUri": "L2Zvcm1yZWNvZ25pemVyL3YyLjAtcHJldmlldy9jdXN0b20vbW9kZWxz",
+      "RequestMethod": "POST",
+      "RequestBody": "{\n  \"source\": \"https://example.org/fake-source\",\n  \"sourceFilter\": {\n    \"prefix\": \"fake-prefix\",\n    \"includeSubFolders\": false\n  }\n}",
+      "RequestHeaders": {
+        "Ocp-Apim-Subscription-Key": [
+          "00000000000000000000000000000000"
+        ],
+        "User-Agent": [
+          "FxVersion/4.700.19.46205",
+          "OSName/MacOs",
+          "OSVersion/Darwin.19.0.0.Darwin.Kernel.Version.19.0.0.Thu.Oct.17.16.17.15.PDT.2019.root.xnu.6153.41.3.29RELEASE.X86.64",
+          "Microsoft.Azure.CognitiveServices.FormRecognizer.FormRecognizerClient/2.0.0.0"
+        ],
+        "Content-Type": [
+          "application/json; charset=utf-8"
+        ],
+        "Content-Length": [
+          "134"
+        ]
+      },
+      "ResponseHeaders": {
+        "Date": [
+          "Fri, 15 Nov 2019 13:48:58 GMT"
+        ],
+        "Server": [
+          "Kestrel"
+        ],
+        "Location": [
+          "http://example.org/formrecognizer/v2.0-preview/custom/models/d4deea17-8a01-43d2-acf9-4a74ec7f143d"
+        ],
+        "Content-Length": [
+          "0"
+        ]
+      },
+      "ResponseBody": "",
+      "StatusCode": 201
+    },
+    {
+      "RequestUri": "/formrecognizer/v2.0-preview/custom/models/d4deea17-8a01-43d2-acf9-4a74ec7f143d?includeKeys=true",
+      "EncodedRequestUri": "L2Zvcm1yZWNvZ25pemVyL3YyLjAtcHJldmlldy9jdXN0b20vbW9kZWxzL2Q0ZGVlYTE3LThhMDEtNDNkMi1hY2Y5LTRhNzRlYzdmMTQzZD9pbmNsdWRlS2V5cz10cnVl",
+      "RequestMethod": "GET",
+      "RequestBody": "",
+      "RequestHeaders": {
+        "Ocp-Apim-Subscription-Key": [
+          "00000000000000000000000000000000"
+        ],
+        "User-Agent": [
+          "FxVersion/4.700.19.46205",
+          "OSName/MacOs",
+          "OSVersion/Darwin.19.0.0.Darwin.Kernel.Version.19.0.0.Thu.Oct.17.16.17.15.PDT.2019.root.xnu.6153.41.3.29RELEASE.X86.64",
+          "Microsoft.Azure.CognitiveServices.FormRecognizer.FormRecognizerClient/2.0.0.0"
+        ]
+      },
+      "ResponseHeaders": {
+        "Date": [
+          "Fri, 15 Nov 2019 13:48:58 GMT"
+        ],
+        "Server": [
+          "Kestrel"
+        ],
+        "Transfer-Encoding": [
+          "chunked"
+        ],
+        "Content-Type": [
+          "application/json; charset=utf-8"
+        ]
+      },
+      "ResponseBody": "{\n  \"modelInfo\": {\n    \"modelId\": \"d4deea17-8a01-43d2-acf9-4a74ec7f143d\",\n    \"status\": \"creating\",\n    \"createdDateTime\": \"2019-11-15T13:48:58Z\",\n    \"lastUpdatedDateTime\": \"2019-11-15T13:48:58Z\"\n  }\n}",
+      "StatusCode": 200
+    },
+    {
+      "RequestUri": "/formrecognizer/v2.0-preview/custom/models/d4deea17-8a01-43d2-acf9-4a74ec7f143d?includeKeys=true",
+      "EncodedRequestUri": "L2Zvcm1yZWNvZ25pemVyL3YyLjAtcHJldmlldy9jdXN0b20vbW9kZWxzL2Q0ZGVlYTE3LThhMDEtNDNkMi1hY2Y5LTRhNzRlYzdmMTQzZD9pbmNsdWRlS2V5cz10cnVl",
+      "RequestMethod": "GET",
+      "RequestBody": "",
+      "RequestHeaders": {
+        "Ocp-Apim-Subscription-Key": [
+          "00000000000000000000000000000000"
+        ],
+        "User-Agent": [
+          "FxVersion/4.700.19.46205",
+          "OSName/MacOs",
+          "OSVersion/Darwin.19.0.0.Darwin.Kernel.Version.19.0.0.Thu.Oct.17.16.17.15.PDT.2019.root.xnu.6153.41.3.29RELEASE.X86.64",
+          "Microsoft.Azure.CognitiveServices.FormRecognizer.FormRecognizerClient/2.0.0.0"
+        ]
+      },
+      "ResponseHeaders": {
+        "Date": [
+          "Fri, 15 Nov 2019 13:49:10 GMT"
+        ],
+        "Server": [
+          "Kestrel"
+        ],
+        "Transfer-Encoding": [
+          "chunked"
+        ],
+        "Content-Type": [
+          "application/json; charset=utf-8"
+        ]
+      },
+      "ResponseBody": "{\n  \"modelInfo\": {\n    \"modelId\": \"d4deea17-8a01-43d2-acf9-4a74ec7f143d\",\n    \"status\": \"creating\",\n    \"createdDateTime\": \"2019-11-15T13:48:58Z\",\n    \"lastUpdatedDateTime\": \"2019-11-15T13:48:58Z\"\n  }\n}",
+      "StatusCode": 200
+    },
+    {
+      "RequestUri": "/formrecognizer/v2.0-preview/custom/models/d4deea17-8a01-43d2-acf9-4a74ec7f143d?includeKeys=true",
+      "EncodedRequestUri": "L2Zvcm1yZWNvZ25pemVyL3YyLjAtcHJldmlldy9jdXN0b20vbW9kZWxzL2Q0ZGVlYTE3LThhMDEtNDNkMi1hY2Y5LTRhNzRlYzdmMTQzZD9pbmNsdWRlS2V5cz10cnVl",
+      "RequestMethod": "GET",
+      "RequestBody": "",
+      "RequestHeaders": {
+        "Ocp-Apim-Subscription-Key": [
+          "00000000000000000000000000000000"
+        ],
+        "User-Agent": [
+          "FxVersion/4.700.19.46205",
+          "OSName/MacOs",
+          "OSVersion/Darwin.19.0.0.Darwin.Kernel.Version.19.0.0.Thu.Oct.17.16.17.15.PDT.2019.root.xnu.6153.41.3.29RELEASE.X86.64",
+          "Microsoft.Azure.CognitiveServices.FormRecognizer.FormRecognizerClient/2.0.0.0"
+        ]
+      },
+      "ResponseHeaders": {
+        "Date": [
+          "Fri, 15 Nov 2019 13:49:20 GMT"
+        ],
+        "Server": [
+          "Kestrel"
+        ],
+        "Transfer-Encoding": [
+          "chunked"
+        ],
+        "Content-Type": [
+          "application/json; charset=utf-8"
+        ]
+      },
+      "ResponseBody": "{\n  \"modelInfo\": {\n    \"modelId\": \"d4deea17-8a01-43d2-acf9-4a74ec7f143d\",\n    \"status\": \"ready\",\n    \"createdDateTime\": \"2019-11-15T13:48:58Z\",\n    \"lastUpdatedDateTime\": \"2019-11-15T13:49:11Z\"\n  },\n  \"trainResult\": {\n    \"averageModelAccuracy\": 0.0,\n    \"trainingDocuments\": [\n      {\n        \"documentName\": \"1.pdf\",\n        \"pages\": 1,\n        \"errors\": [],\n        \"status\": \"succeeded\"\n      },\n      {\n        \"documentName\": \"2.pdf\",\n        \"pages\": 1,\n        \"errors\": [],\n        \"status\": \"succeeded\"\n      },\n      {\n        \"documentName\": \"3.pdf\",\n        \"pages\": 1,\n        \"errors\": [],\n        \"status\": \"succeeded\"\n      },\n      {\n        \"documentName\": \"4.pdf\",\n        \"pages\": 2,\n        \"errors\": [],\n        \"status\": \"succeeded\"\n      },\n      {\n        \"documentName\": \"5.pdf\",\n        \"pages\": 1,\n        \"errors\": [],\n        \"status\": \"succeeded\"\n      }\n    ],\n    \"errors\": []\n  }\n}",
+      "StatusCode": 200
+    }
+  ],
+  "Names": {},
+  "Variables": {}
+}

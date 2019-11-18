@@ -32,7 +32,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
         /// from the input.</param>
         /// <param name="errors">List of errors reported during the analyze
         /// operation.</param>
-        public AnalyzeResult(string version, IList<ReadResult> readResults, IList<PageResult> pageResults = default(IList<PageResult>), IList<DocumentResult> documentResults = default(IList<DocumentResult>), IList<FormOperationError> errors = default(IList<FormOperationError>))
+        public AnalyzeResult(string version, IList<ReadResult> readResults, IList<PageResult> pageResults = default(IList<PageResult>), IList<DocumentResult> documentResults = default(IList<DocumentResult>), IList<ErrorInformation> errors = default(IList<ErrorInformation>))
         {
             Version = version;
             ReadResults = readResults;
@@ -87,7 +87,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
         /// Gets or sets list of errors reported during the analyze operation.
         /// </summary>
         [JsonProperty(PropertyName = "errors")]
-        public IList<FormOperationError> Errors { get; set; }
+        public IList<ErrorInformation> Errors { get; set; }
         public bool ShouldSerializeErrors()
         {
             return (Errors != null);

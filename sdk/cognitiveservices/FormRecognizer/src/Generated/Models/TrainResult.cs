@@ -39,7 +39,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
         /// <param name="averageModelAccuracy">Average accuracy.</param>
         /// <param name="errors">Errors returned during the training
         /// operation.</param>
-        public TrainResult(IList<TrainingDocumentInfo> trainingDocuments, IList<FormFieldsReport> fields = default(IList<FormFieldsReport>), double averageModelAccuracy = default(double), IList<FormOperationError> errors = default(IList<FormOperationError>))
+        public TrainResult(IList<TrainingDocumentInfo> trainingDocuments, IList<FormFieldsReport> fields = default(IList<FormFieldsReport>), double averageModelAccuracy = default(double), IList<ErrorInformation> errors = default(IList<ErrorInformation>))
         {
             TrainingDocuments = trainingDocuments;
             Fields = fields;
@@ -77,7 +77,7 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
         /// Gets or sets errors returned during the training operation.
         /// </summary>
         [JsonProperty(PropertyName = "errors")]
-        public IList<FormOperationError> Errors { get; set; }
+        public IList<ErrorInformation> Errors { get; set; }
 
         /// <summary>
         /// Validate the object.

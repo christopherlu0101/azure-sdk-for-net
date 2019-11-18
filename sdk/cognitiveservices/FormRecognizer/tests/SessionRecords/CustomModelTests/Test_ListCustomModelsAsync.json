@@ -1,0 +1,39 @@
+{
+  "Entries": [
+    {
+      "RequestUri": "/formrecognizer/v2.0-preview/custom/models",
+      "EncodedRequestUri": "L2Zvcm1yZWNvZ25pemVyL3YyLjAtcHJldmlldy9jdXN0b20vbW9kZWxz",
+      "RequestMethod": "GET",
+      "RequestBody": "",
+      "RequestHeaders": {
+        "Ocp-Apim-Subscription-Key": [
+          "00000000000000000000000000000000"
+        ],
+        "User-Agent": [
+          "FxVersion/4.700.19.46205",
+          "OSName/MacOs",
+          "OSVersion/Darwin.19.0.0.Darwin.Kernel.Version.19.0.0.Thu.Oct.17.16.17.15.PDT.2019.root.xnu.6153.41.3.29RELEASE.X86.64",
+          "Microsoft.Azure.CognitiveServices.FormRecognizer.FormRecognizerClient/2.0.0.0"
+        ]
+      },
+      "ResponseHeaders": {
+        "Date": [
+          "Fri, 15 Nov 2019 13:11:28 GMT"
+        ],
+        "Server": [
+          "Kestrel"
+        ],
+        "Transfer-Encoding": [
+          "chunked"
+        ],
+        "Content-Type": [
+          "application/json; charset=utf-8"
+        ]
+      },
+      "ResponseBody": "{\n  \"modelList\": [\n    {\n      \"modelId\": \"0e2906e4-298a-4249-a37c-d60fb29fc6b5\",\n      \"status\": \"ready\",\n      \"createdDateTime\": \"2019-11-14T22:43:58Z\",\n      \"lastUpdatedDateTime\": \"2019-11-14T22:44:09Z\"\n    },\n    {\n      \"modelId\": \"45b6ae7b-1dde-465c-a8f1-dac3bcfb3975\",\n      \"status\": \"ready\",\n      \"createdDateTime\": \"2019-11-14T22:44:51Z\",\n      \"lastUpdatedDateTime\": \"2019-11-14T22:45:02Z\"\n    },\n    {\n      \"modelId\": \"5384ea4f-3d8e-41f2-987b-ed45f4cd1771\",\n      \"status\": \"ready\",\n      \"createdDateTime\": \"2019-11-15T12:25:21Z\",\n      \"lastUpdatedDateTime\": \"2019-11-15T12:25:28Z\"\n    }\n  ],\n  \"nextLink\": \"\"\n}",
+      "StatusCode": 200
+    }
+  ],
+  "Names": {},
+  "Variables": {}
+}

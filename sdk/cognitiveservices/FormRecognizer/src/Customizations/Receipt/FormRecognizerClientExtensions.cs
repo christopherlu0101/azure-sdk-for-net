@@ -15,49 +15,55 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
     {
         public static async Task<AnalyzeReceiptAsyncHeaders> StartAnalyzeReceiptAsync(this IFormRecognizerClient operations, Uri uri, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var resp = await operations.AnalyzeReceiptWithHttpMessagesAsync(uri, null, cancellationToken).ConfigureAwait(false);
-            return resp.Headers;
+            using (var resp = await operations.AnalyzeReceiptWithHttpMessagesAsync(uri, null, cancellationToken).ConfigureAwait(false))
+            {
+                return resp.Headers;
+            }
         }
 
-        public static async Task<AnalyzeReceiptAsyncHeaders> StartAnalyzeReceiptAsync(this IFormRecognizerClient operations, Stream fileStream, AnalysisContentType contentTyep, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<AnalyzeReceiptAsyncHeaders> StartAnalyzeReceiptAsync(this IFormRecognizerClient operations, Stream fileStream, AnalysisContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var resp = await operations.AnalyzeReceiptWithHttpMessagesAsync(fileStream, contentTyep, null, cancellationToken).ConfigureAwait(false);
-            return resp.Headers;
+            using (var resp = await operations.AnalyzeReceiptWithHttpMessagesAsync(fileStream, contentType, null, cancellationToken).ConfigureAwait(false))
+            {
+                return resp.Headers;
+            }
         }
 
-        public static async Task<AnalyzeReceiptAsyncHeaders> StartAnalyzeReceiptAsync(this IFormRecognizerClient operations, byte[] byteArray, AnalysisContentType contentTyep, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<AnalyzeReceiptAsyncHeaders> StartAnalyzeReceiptAsync(this IFormRecognizerClient operations, byte[] byteArray, AnalysisContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var resp = await operations.AnalyzeReceiptWithHttpMessagesAsync(byteArray, contentTyep, null, cancellationToken).ConfigureAwait(false);
-            return resp.Headers;
+            using (var resp = await operations.AnalyzeReceiptWithHttpMessagesAsync(byteArray, contentType, null, cancellationToken).ConfigureAwait(false))
+            {
+                return resp.Headers;
+            }
         }
 
-        public static async Task<AnalyzeOperationResult> AnalyzeReceiptAsync(this IFormRecognizerClient operations, Uri uri, int retryTimes = 5, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<AnalyzeOperationResult> AnalyzeReceiptAsync(this IFormRecognizerClient operations, Uri uri, CancellationToken cancellationToken = default(CancellationToken))
         {
             using (var _result = await operations.AnalyzeReceiptWithHttpMessagesAsync(uri, null, cancellationToken).ConfigureAwait(false))
             {
                 var header = _result.Headers;
-                var guid = GetGuid(header.OperationLocation);
-                return await operations.PollingResultAsync(guid, AnalyzeType.Receipt, retryTimes, cancellationToken);
+                var operationId = GetOperationId(header.OperationLocation);
+                return await operations.WaitForOperation((ct) => operations.GetAnalyzeReceiptResultAsync(operationId, ct), cancellationToken);
             }
         }
 
-        public static async Task<AnalyzeOperationResult> AnalyzeReceiptAsync(this IFormRecognizerClient operations, Stream fileStream, AnalysisContentType contentTyep, int retryTimes = 5, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<AnalyzeOperationResult> AnalyzeReceiptAsync(this IFormRecognizerClient operations, Stream fileStream, AnalysisContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var _result = await operations.AnalyzeReceiptWithHttpMessagesAsync(fileStream, contentTyep, null, cancellationToken).ConfigureAwait(false))
+            using (var _result = await operations.AnalyzeReceiptWithHttpMessagesAsync(fileStream, contentType, null, cancellationToken).ConfigureAwait(false))
             {
                 var header = _result.Headers;
-                var guid = GetGuid(header.OperationLocation);
-                return await operations.PollingResultAsync(guid, AnalyzeType.Receipt, retryTimes, cancellationToken);
+                var operationId = GetOperationId(header.OperationLocation);
+                return await operations.WaitForOperation((ct) => operations.GetAnalyzeReceiptResultAsync(operationId, ct), cancellationToken);
             }
         }
 
-        public static async Task<AnalyzeOperationResult> AnalyzeReceiptAsync(this IFormRecognizerClient operations, byte[] byteArray, AnalysisContentType contentTyep, int retryTimes = 5, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<AnalyzeOperationResult> AnalyzeReceiptAsync(this IFormRecognizerClient operations, byte[] byteArray, AnalysisContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var _result = await operations.AnalyzeReceiptWithHttpMessagesAsync(byteArray, contentTyep, null, cancellationToken).ConfigureAwait(false))
+            using (var _result = await operations.AnalyzeReceiptWithHttpMessagesAsync(byteArray, contentType, null, cancellationToken).ConfigureAwait(false))
             {
                 var header = _result.Headers;
-                var guid = GetGuid(header.OperationLocation);
-                return await operations.PollingResultAsync(guid, AnalyzeType.Receipt, retryTimes, cancellationToken);
+                var operationId = GetOperationId(header.OperationLocation);
+                return await operations.WaitForOperation((ct) => operations.GetAnalyzeReceiptResultAsync(operationId, ct), cancellationToken);
             }
         }
 

@@ -296,6 +296,11 @@ namespace Microsoft.Azure.CognitiveServices.FormRecognizer
             _httpRequest.Method = new HttpMethod("POST");
             _httpRequest.RequestUri = new System.Uri(_url);
 
+            // Because we are sending an arbitrarily large POST payload, and the server may reject large payloads,
+            // instruct the client to wait for 100-continue from the server before writing the data. Without this,
+            // the client will receive an IO Exception for a broken pipe during a naive write of a large payload
+            _httpRequest.Headers.ExpectContinue = true;
+
             // Set Headers
             if (customHeaders != null)
             {

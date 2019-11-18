@@ -1,0 +1,36 @@
+{
+  "Entries": [
+    {
+      "RequestUri": "/formrecognizer/v2.0-preview/custom/models/5384ea4f-3d8e-41f2-987b-ed45f4cd1771",
+      "EncodedRequestUri": "L2Zvcm1yZWNvZ25pemVyL3YyLjAtcHJldmlldy9jdXN0b20vbW9kZWxzLzUzODRlYTRmLTNkOGUtNDFmMi05ODdiLWVkNDVmNGNkMTc3MQ==",
+      "RequestMethod": "DELETE",
+      "RequestBody": "",
+      "RequestHeaders": {
+        "Ocp-Apim-Subscription-Key": [
+          "00000000000000000000000000000000"
+        ],
+        "User-Agent": [
+          "FxVersion/4.700.19.46205",
+          "OSName/MacOs",
+          "OSVersion/Darwin.19.0.0.Darwin.Kernel.Version.19.0.0.Thu.Oct.17.16.17.15.PDT.2019.root.xnu.6153.41.3.29RELEASE.X86.64",
+          "Microsoft.Azure.CognitiveServices.FormRecognizer.FormRecognizerClient/2.0.0.0"
+        ]
+      },
+      "ResponseHeaders": {
+        "Date": [
+          "Fri, 15 Nov 2019 14:49:44 GMT"
+        ],
+        "Server": [
+          "Kestrel"
+        ],
+        "Content-Length": [
+          "0"
+        ]
+      },
+      "ResponseBody": "",
+      "StatusCode": 204
+    }
+  ],
+  "Names": {},
+  "Variables": {}
+}
