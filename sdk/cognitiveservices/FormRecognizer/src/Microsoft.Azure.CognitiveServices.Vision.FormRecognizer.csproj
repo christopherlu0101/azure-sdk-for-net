@@ -1,30 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyTitle>Microsoft Cognitive Services Form Recognizer SDK</AssemblyTitle>
-    <Description>This client library provides access to the Microsoft Cognitive Services Form Recognizer APIs.</Description>
-    <Version>1.0.0-preview.1</Version>
-    <PackageTags>FormRecognizer;Form Recognizer;</PackageTags>
-    <PackageReleaseNotes>
-<![CDATA[
-This is a public preview release of the Cognitive Services Form Recognizer SDK.
-]]>
+  <AssemblyTitle>Microsoft Cognitive Services Form Recognizer SDK</AssemblyTitle>
+  <Description>This client library provides access to the Microsoft Cognitive Services Form Recognizer APIs.</Description>
+  <Version>1.0.0-preview.1</Version>
+  <PackageTags>FormRecognizer;Form Recognizer;</PackageTags>
+  <PackageReleaseNotes>
+    <![CDATA[
+    This is a public preview release of the Cognitive Services Form Recognizer SDK.
+    ]]>
 	</PackageReleaseNotes>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
-
+  
+  <!-- Import the Azure.Core project -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\core\Azure.Core\src\Azure.Core.props" />
   <ItemGroup>
-    <Compile Remove="Properties\AssemblyInfo.cs" />
+    <Compile Include="$(AzureCoreSharedSources)ArrayBufferWriter.cs" />
+    <Compile Include="$(AzureCoreSharedSources)ContentTypeUtilities.cs" />
+    <Compile Include="$(AzureCoreSharedSources)ConditionalRequestOptionsExtensions.cs" />
+    <Compile Include="$(AzureCoreSharedSources)HashCodeBuilder.cs" />
+    <Compile Include="$(AzureCoreSharedSources)NoBodyResponse{T}.cs" />
+    <Compile Include="$(AzureCoreSharedSources)PageResponseEnumerator.cs" />
+    <Compile Include="$(AzureCoreSharedSources)ResponseExceptionExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFrameworks>$(RequiredTargetFrameworks)</TargetFrameworks>
-  </PropertyGroup>
   
-  <PropertyGroup>
-    <AzureApiTag />
-    <PackageTags>$(PackageTags);$(CommonTags);$(AzureApiTag);</PackageTags>
-  </PropertyGroup>
 </Project>
