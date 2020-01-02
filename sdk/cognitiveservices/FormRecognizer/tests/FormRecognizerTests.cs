@@ -13,15 +13,27 @@ namespace FormRecognizerSDK.Tests
         [Fact]
         public void test()
         {
-            var endpoint = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/prebuilt/receipt/analyze";
+            //var endpoint = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/prebuilt/receipt/analyze";
+            var endpoint = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/";
             var apiKey = "184654c847d54432b8301a4b76f63045";
             var client = new FormRecognizerClient(endpoint, apiKey);
 
             using (FileStream stream = new FileStream(@"D:/Data/Receipt_000_000.jpg", FileMode.Open))
             {
                 var id = client.StartAnalyzeReceiptAsync(stream).Result;
-
+                var result = client.GetReceiptAnalyzeResultAsync(id).Result;
+                Console.WriteLine(result);
             }
+        }
+
+        [Fact]
+        public void test2()
+        {
+            //var endpoint = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/prebuilt/receipt/analyze";
+            var endpoint = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/";
+            var apiKey = "184654c847d54432b8301a4b76f63045";
+            var client = new FormRecognizerClient(endpoint, apiKey);
+            var id = client.StartAnalyzeReceiptAsync("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSAwPgac6wRJwk-bDoSjUsc5UXCMouwr0ICk2nVXNDqtRhvJA8t").Result;
         }
     }
 }

@@ -10,8 +10,13 @@
     ]]>
 	</PackageReleaseNotes>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-  </PropertyGroup>
+    <IsClientLibrary>true</IsClientLibrary>
+  </PropertyGroup>  
   
+  <ItemGroup>  
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+
   <!-- Import the Azure.Core project -->
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\core\Azure.Core\src\Azure.Core.props" />
   <ItemGroup>
@@ -26,6 +31,5 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
-  </ItemGroup>
-  
+  </ItemGroup>  
 </Project>
