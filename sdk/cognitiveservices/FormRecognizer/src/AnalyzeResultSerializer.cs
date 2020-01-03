@@ -143,8 +143,8 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                                     readResult.Height = json.GetDouble();
                                     break;
                                 case "unit":
-                                    //readResult.Unit = Enum.Parse(typeof(LengthUnit), json.GetString());
-                                    readResult.Unit = LengthUnit.Inch;
+                                    Enum.TryParse(json.GetString(), true, out LengthUnit lengthUnit);
+                                    readResult.Unit = lengthUnit;
                                     break;
                                 case "language":
                                     readResult.Language = json.GetString();
@@ -290,15 +290,55 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                                         Enum.TryParse(json.GetString(), true, out FieldValueType fieldValueType);
                                         field.Type = fieldValueType;
                                         break;
+                                    case "valueString":
+                                        field.ValueString = json.GetString();
+                                        break;
+                                    case "valueDate":
+                                        field.ValueDate = json.GetString();
+                                        break;
+                                    case "valueTime":
+                                        field.ValueTime = json.GetString();
+                                        break;
+                                    case "valuePhoneNumber":
+                                        field.ValuePhoneNumber = json.GetString();
+                                        break;
+                                    case "valueNumber":
+                                        field.ValueNumber = json.GetDouble();
+                                        break;
+                                    case "valueInteger":
+                                        field.ValueInteger = json.GetInt32();
+                                        break;
+                                    case "valueArray":
+                                        var fieldArray = new List<FieldValue>();
+                                        while (json.Read() && json.TokenType != JsonTokenType.EndArray)
+                                        {
+                                            fieldArray.Add(ParseField(ref json));
+                                        }
+                                        field.ValueArray = fieldArray;
+                                        break;
                                     case "boundingBox":
                                         var boundingBox = new List<double>();
                                         while (json.Read() && json.TokenType != JsonTokenType.EndArray)
                                         {
                                             boundingBox.Add(json.GetDouble());
                                         }
+                                        field.BoundingBox = boundingBox;
+                                        break;
+                                    case "valueObject":
+                                        break;
+                                    case "text":
+                                        field.Text = json.GetString();
+                                        break;
+                                    case "confidence":
+                                        field.Confidence = json.GetDouble();
+                                        break;
+                                    case "elements":
+                                        break;
+                                    case "page":
+                                        field.Page = json.GetInt32();
                                         break;
                                     default:
-                                        break;
+                                        throw new Exception($"Invalid field value name : {name}.");
                                 }
                                 break;
                             }
