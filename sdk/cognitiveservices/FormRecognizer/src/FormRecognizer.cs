@@ -8,7 +8,6 @@ using Azure.Core;
 using Azure.Core.Pipeline;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 {
@@ -83,20 +82,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     using (var reader = new StreamReader(response.ContentStream))
                     {                        
                         var content = reader.ReadToEnd();
-
-                        //using (var json = JsonDocument.Parse(content, default))
-                        //{
-                        //    var root = json.RootElement;
-                        //    if (root.TryGetProperty("analyzeResult", out JsonElement documentsValue))
-                        //    {                                
-                        //        foreach (var documentElement in documentsValue.EnumerateObject())
-                        //        {
-                        //            Console.WriteLine(documentElement);
-                        //        }
-                        //    }
-                        //}
-
-
+                        FormRecoginzerSerializer.Deserialize(content);
                         return Response.FromValue(content, response);
                     }
                 }
@@ -121,11 +107,6 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             }
             return parts[parts.Length - 1];
         }
-
-    }
-
-    public class AnalyzeResult
-    {
 
     }
 
