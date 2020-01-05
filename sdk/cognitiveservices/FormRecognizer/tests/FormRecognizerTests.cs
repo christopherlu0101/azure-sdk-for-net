@@ -18,7 +18,7 @@ namespace FormRecognizerSDK.Tests
             var apiKey = "184654c847d54432b8301a4b76f63045";
             var client = new FormRecognizerClient(endpoint, apiKey);
 
-            using (FileStream stream = new FileStream(@"D:/Data/Receipt_000_000.jpg", FileMode.Open))
+            using (FileStream stream = new FileStream(@"D:/Data/Receipt_044_065.jpg", FileMode.Open))
             {
                 var id = client.StartAnalyzeReceiptAsync(stream).Result;
                 var result = client.GetReceiptAnalyzeResultAsync(id).Result;
@@ -34,6 +34,13 @@ namespace FormRecognizerSDK.Tests
             var apiKey = "184654c847d54432b8301a4b76f63045";
             var client = new FormRecognizerClient(endpoint, apiKey);
             var id = client.StartAnalyzeReceiptAsync("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSAwPgac6wRJwk-bDoSjUsc5UXCMouwr0ICk2nVXNDqtRhvJA8t").Result;
+        }
+
+        [Fact]
+        public void offlineTest()
+        {
+            var jsonString = File.ReadAllText(@"D:/Data/json1.json");
+            FormRecoginzerSerializer2.Deserialize(jsonString);
         }
     }
 }

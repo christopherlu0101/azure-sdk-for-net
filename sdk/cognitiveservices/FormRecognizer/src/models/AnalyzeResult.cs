@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
 {
-    public  class AnalyzeResult
+    public class AnalyzeResult
     {
         public string Version { get; set; }
         public IList<ReadResult> ReadResults { get; set; }

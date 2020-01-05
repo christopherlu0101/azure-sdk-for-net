@@ -1,0 +1,51 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2020-01-04T06:42:51Z",
+  "lastUpdatedDateTime": "2020-01-04T06:43:00Z",
+  "analyzeResult": {
+    "version": "2.0.0",
+    "readResults": [
+      {
+        "page": 1,
+        "angle": -2.4874,
+        "width": 3024,
+        "height": 4032,
+        "unit": "pixel",
+        "language": "en"
+      }
+    ],
+    "documentResults": [
+      {
+        "docType": "prebuilt:receipt",
+        "pageRange": [
+          1,
+          1
+        ],
+        "fields": {
+          "ReceiptType": {
+            "type": "string",
+            "valueString": "Itemized",
+            "confidence": 0.983
+          },
+          "MerchantName": {
+            "type": "string",
+            "valueString": "ShopRite",
+            "text": "ShopRite",
+            "boundingBox": [
+              1786.8,
+              376.3,
+              1882,
+              367,
+              1884.2,
+              389.7,
+              1789,
+              399
+            ],
+            "page": 1,
+            "confidence": 0.511
+          }
+        }
+      }
+    ]
+  }
+}
