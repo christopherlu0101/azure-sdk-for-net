@@ -255,22 +255,5 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             while (cnt > 0 && reader.Read());
             return obj;
         }
-
-        private static object CreateInstanceByType(Type type)
-        {
-            var name = type.FullName;
-            if (name == typeof(String).FullName)
-            {
-                return "abc";
-            }
-            else if (name == typeof(IList<ReadResult>).FullName)
-            {
-                return new List<ReadResult>();
-            }
-            else
-            {
-                return null;
-            }
-        }
     }
 }
