@@ -6,11 +6,160 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Azure.CognitiveServices.FormRecognizer.Models;
 using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.models;
+using Azure;
+using Azure.Core;
+using System.IO;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 {
     public class FormRecoginzerSerializer
     {
+        public static void Serialize(ResponseBody body)
+        {
+            var stream = new MemoryStream();
+            var writer = new Utf8JsonWriter(stream);
+
+            writer.WriteStartObject();
+            SerializeProperty(ref writer, typeof(ResponseBody), body);
+            writer.WriteEndObject();
+            writer.Flush();            
+
+            // debug usage
+            string json = Encoding.UTF8.GetString(stream.ToArray());
+            Console.WriteLine(json);
+            // return Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        public static void SerializeProperty(ref Utf8JsonWriter writer, Type type, object obj)
+        {
+            foreach (var property in type.GetProperties())
+            {
+                var value = property.GetValue(obj, null);
+                if (value != null)
+                {
+                    writer.WritePropertyName(property.Name);
+                    SerializeObject(ref writer, property.PropertyType, value);
+                }
+            }
+        }
+
+        public static void SerializeObject(ref Utf8JsonWriter writer, Type type, object value)
+        {
+            if (type.Name == typeof(int).Name)
+            {
+                writer.WriteNumberValue((int)value);
+            }
+            else if (type.Name == typeof(double).Name)
+            {
+                writer.WriteNumberValue((double)value);
+            }
+            else if (type.Name == typeof(string).Name || type.IsEnum)
+            {
+                writer.WriteStringValue(value.ToString());
+            }
+            else if (type.Name == typeof(DateTime).Name)
+            {
+                writer.WriteStringValue((DateTime)value);
+            }
+            else if (type.IsGenericType)
+            {
+                // List
+                if (type.Name == typeof(IList<int>).Name)
+                {
+                    writer.WriteStartArray();
+                    var contentType = type.GetGenericArguments()[0];
+                    foreach (var obj in (System.Collections.IEnumerable)value)
+                    {
+                        SerializeObject(ref writer, contentType, obj);
+                    }                    
+                    writer.WriteEndArray();
+                }
+                // Dictionary
+                else if (type.Name == typeof(IDictionary<string, object>).Name)
+                {
+                    // TODO : generalize FieldValue
+                    writer.WriteStartObject();
+                    foreach (var kv in (Dictionary<string, FieldValue>)value)
+                    {
+                        writer.WritePropertyName(kv.Key);
+                        var contentType = type.GetGenericArguments()[1];
+                        SerializeObject(ref writer, contentType, kv.Value);
+                    }
+                    writer.WriteEndObject();
+                }
+                // Nullable
+                else if (type.Name == typeof(int?).Name)
+                {
+                    var contentType = type.GetGenericArguments()[0];
+                    if (contentType.Name == typeof(double).Name)
+                    {
+                        writer.WriteNumberValue(((double?)value).Value);
+                    }
+                    else if (contentType.Name == typeof(int).Name)
+                    {
+                        writer.WriteNumberValue(((int?)value).Value);
+                    }
+                    else
+                    {
+                        throw new Exception("Unsupported number type.");
+                    }                    
+                }
+            }
+            else if (type.Name == typeof(FieldValue).Name)
+            {
+                writer.WriteStartObject();
+                foreach (var property in type.GetProperties())
+                {
+                    if (!property.Name.Contains("Value"))
+                    {
+                        var propertyValue = property.GetValue(value, null);
+                        if (propertyValue != null)
+                        {
+                            writer.WritePropertyName(property.Name);
+                            SerializeObject(ref writer, property.PropertyType, propertyValue);
+                        }
+                    }
+                }
+                var fieldValue = ((FieldValue)value);
+                var fieldValueType = fieldValue.Type;
+                switch (fieldValueType)
+                {
+                    case FieldValueType.Array:
+                        writer.WritePropertyName("ValueArray");
+                        SerializeObject(ref writer, fieldValue.ValueArray.GetType(), fieldValue.ValueArray);
+                        break;
+                    case FieldValueType.Object:
+                        writer.WritePropertyName("ValueObject");
+                        SerializeObject(ref writer, fieldValue.ValueObject.GetType(), fieldValue.ValueObject);
+                        break;
+                    case FieldValueType.Integer:
+                        writer.WriteNumber("ValueInteger", fieldValue.ValueInteger);
+                        break;
+                    case FieldValueType.Number:
+                        writer.WriteNumber("ValueNumber", fieldValue.ValueNumber);
+                        break;
+                    case FieldValueType.Date:
+                        writer.WriteString("ValueDate", fieldValue.ValueDate);
+                        break;
+                    case FieldValueType.Time:
+                        writer.WriteString("ValueTime", fieldValue.ValueTime);
+                        break;
+                    case FieldValueType.PhoneNumber:
+                    case FieldValueType.String:
+                        writer.WriteString("ValueString", fieldValue.ValueString);
+                        break;
+                }
+                writer.WriteEndObject();
+            }
+            else
+            {
+                writer.WriteStartObject();
+                SerializeProperty(ref writer, type, value);
+                writer.WriteEndObject();
+
+            }
+        }
+
         public static ResponseBody Deserialize(string jsonString)
         {
             var result = new ResponseBody();
