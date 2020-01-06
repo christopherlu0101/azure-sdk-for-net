@@ -39,8 +39,8 @@ namespace FormRecognizerSDK.Tests
         [Fact]
         public void offlineTest()
         {
-            var jsonString = File.ReadAllText(@"D:/Data/json1.json");
-            FormRecoginzerSerializer2.Deserialize(jsonString);
+            var jsonString = File.ReadAllText(@"TestImages/json1.json");
+            FormRecoginzerSerializer.Deserialize(jsonString);
         }
     }
 }

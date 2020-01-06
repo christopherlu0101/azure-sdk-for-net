@@ -83,7 +83,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     {                        
                         var content = reader.ReadToEnd();
                         //FormRecoginzerSerializer.Deserialize(content);
-                        FormRecoginzerSerializer2.Deserialize(content);
+                        FormRecoginzerSerializer.Deserialize(content);
                         return Response.FromValue(content, response);
                     }
                 }

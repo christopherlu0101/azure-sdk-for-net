@@ -9,7 +9,7 @@ using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.models;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 {
-    public static class FormRecoginzerSerializer2
+    public class FormRecoginzerSerializer
     {
         public static ResponseBody Deserialize(string jsonString)
         {
@@ -35,12 +35,86 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             return result;
         }
 
-        // Add property should modify this function.
-        // TODO : same type should be factor out.
-        private static object ParseProperty(ref Utf8JsonReader reader, Type type)
+        public delegate object GenericDelegate(ref Utf8JsonReader reader);
+
+        // Add property should check if type exist in this function.
+        public static object ParseProperty(ref Utf8JsonReader reader, Type type)
         {
             var name = type.FullName;
-            if (name == typeof(string).FullName)
+            if (type.IsEnum)
+            {
+                if (reader.Read() && reader.TokenType == JsonTokenType.String)
+                {
+
+                    var genericParseEnum = typeof(FormRecoginzerSerializer)
+                        .GetMethod("ParseEnum")
+                        .MakeGenericMethod(type);
+                    return genericParseEnum.Invoke(new FormRecoginzerSerializer(), new object[] { reader.GetString() });
+
+                }
+                throw new Exception($"Invalid {name} property.");
+            }
+            else if (type.IsGenericType)
+            {
+                // Nullable
+                if (type.Name == typeof(int?).Name)
+                {
+                    if (reader.Read())
+                    {
+                        if (reader.TokenType == JsonTokenType.Null)
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            return Convert.ChangeType(reader.GetDouble(), type.GetGenericArguments()[0]);
+                        }
+                    }
+                    throw new Exception($"Invalid {name} property.");
+                }
+                // IList
+                else if (type.Name == typeof(IList<int>).Name)
+                {
+                    var contentType = type.GetGenericArguments()[0];
+                    if (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
+                    {
+                        var genericParseArray = typeof(FormRecoginzerSerializer)
+                            .GetMethod("ParseArray")
+                            .MakeGenericMethod(contentType);                        
+                        var delegator = (GenericDelegate)Delegate.CreateDelegate(typeof(GenericDelegate), genericParseArray);
+                        return delegator.Invoke(ref reader);
+                    }
+                    throw new Exception($"Invalid {name} property.");
+                }
+                // IDictionary
+                else if (type.Name == typeof(IDictionary<string, object>).Name)
+                {
+                    // first argments will be string
+                    var contentType = type.GetGenericArguments()[1];
+                    if (reader.Read() && reader.TokenType == JsonTokenType.StartObject)
+                    {
+                        var genericParseStringDictionary = typeof(FormRecoginzerSerializer)
+                            .GetMethod("ParseStringDictionary")
+                            .MakeGenericMethod(contentType);
+                        var delegator = (GenericDelegate)Delegate.CreateDelegate(typeof(GenericDelegate), genericParseStringDictionary);
+                        return delegator.Invoke(ref reader);
+                    }
+                    throw new Exception($"Invalid {name} property.");
+                }
+                else
+                {
+                    throw new Exception($"Unknown generic type {type.FullName}");
+                }
+            }
+            else if (name == typeof(AnalyzeResult).FullName)
+            {
+                if (reader.Read() && reader.TokenType == JsonTokenType.StartObject)
+                {
+                    return ParseObject(ref reader, typeof(AnalyzeResult));
+                }
+                throw new Exception($"Invalid {name} property.");
+            }
+            else if (name == typeof(string).FullName)
             {
                 if (reader.Read() && reader.TokenType == JsonTokenType.String)
                 {
@@ -48,7 +122,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                 }
                 throw new Exception($"Invalid {name} property.");
             }
-            else if(name == typeof(DateTime).FullName)
+            else if (name == typeof(DateTime).FullName)
             {
                 if (reader.Read() && reader.TokenType == JsonTokenType.String)
                 {
@@ -72,108 +146,20 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                 }
                 throw new Exception($"Invalid {name} property.");
             }
-            else if (name == typeof(double?).FullName)
-            {
-                if (reader.Read())
-                {
-                    if (reader.TokenType == JsonTokenType.Number)
-                    {
-                        return reader.GetDouble();
-                    }
-                    else if (reader.TokenType == JsonTokenType.Null)
-                    {
-                        return null;
-                    }
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(LengthUnit).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.String)
-                {
-                    var value = reader.GetString();
-                    Enum.TryParse(value, true, out LengthUnit enumValue);
-                    return enumValue;
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(FieldValueType).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.String)
-                {
-                    var value = reader.GetString();
-                    Enum.TryParse(value, true, out FieldValueType enumValue);
-                    return enumValue;
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(AnalyzeResult).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.StartObject)
-                {
-                    return ParseObject(ref reader, typeof(AnalyzeResult));
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(IList<ReadResult>).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
-                {
-                    return ParseArray<ReadResult>(ref reader);
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(IList<PageResult>).FullName)
-            {
-                return null;
-            }
-            else if (name == typeof(IList<DocumentResult>).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
-                {
-                    return ParseArray<DocumentResult>(ref reader);
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(IList<int>).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
-                {
-                    return ParseArray<int>(ref reader);
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(IList<double>).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
-                {
-                    return ParseArray<double>(ref reader);
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(IList<FieldValue>).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
-                {
-                    return ParseArray<FieldValue>(ref reader);
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
-            else if (name == typeof(IDictionary<string, FieldValue>).FullName)
-            {
-                if (reader.Read() && reader.TokenType == JsonTokenType.StartObject)
-                {
-                    return ParseStringDictionary<FieldValue>(ref reader);
-                }
-                throw new Exception($"Invalid {name} property.");
-            }
             else
             {
                 return null;
             }
         }
 
-        private static object ParseStringDictionary<T>(ref Utf8JsonReader reader)
+        public static TEnum ParseEnum<TEnum>(string value)
+            where TEnum : struct
+        {
+            Enum.TryParse(value, true, out TEnum enumValue);
+            return enumValue;
+        }
+
+        public static object ParseStringDictionary<T>(ref Utf8JsonReader reader)
         {
             var obj = new Dictionary<string, T>();
             while(reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
@@ -192,7 +178,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             return obj;
         }
 
-        private static object ParseArray<T>(ref Utf8JsonReader reader)
+        public static object ParseArray<T>(ref Utf8JsonReader reader)
         {
             var obj = new List<T>();
             if (reader.TokenType == JsonTokenType.StartArray)
@@ -208,9 +194,10 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             throw new Exception("Invalid array value");
         }
 
-        private static object ParseObject(ref Utf8JsonReader reader, Type type)
+        public static object ParseObject(ref Utf8JsonReader reader, Type type)
         {
-            var obj = Activator.CreateInstance(type);
+            // String has no parameterless constructor.
+            var obj = (type.Name != typeof(string).Name) ? Activator.CreateInstance(type) : null;
             int cnt = 0;
             do
             {
