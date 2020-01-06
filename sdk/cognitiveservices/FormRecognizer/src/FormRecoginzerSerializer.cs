@@ -23,6 +23,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 
     public class FormRecoginzerSerializer
     {
+        # region serialization        
         public static string Serialize(ResponseBody body)
         {
             var stream = new MemoryStream();
@@ -177,7 +178,9 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     break;
             }
         }
+        # endregion
 
+        # region deserialization
         public static ResponseBody Deserialize(string jsonString)
         {
             var result = new ResponseBody();
@@ -407,5 +410,6 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             while (cnt > 0 && reader.Read());
             return obj;
         }
+        # endregion
     }
 }
