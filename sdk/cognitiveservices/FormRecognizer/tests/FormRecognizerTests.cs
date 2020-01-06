@@ -1,7 +1,4 @@
 ﻿using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer;
-using Microsoft.Azure.Test.HttpRecorder;
-using Microsoft.Rest.ClientRuntime.Azure.TestFramework;
-using Newtonsoft.Json;
 using Xunit;
 using System;
 using System.IO;
@@ -40,8 +37,11 @@ namespace FormRecognizerSDK.Tests
         public void offlineTest()
         {
             var jsonString = File.ReadAllText(@"TestImages/json1.json");
-            var obj = FormRecoginzerSerializer.Deserialize(jsonString);
-            FormRecoginzerSerializer.Serialize(obj);
+            var obj1 = FormRecoginzerSerializer.Deserialize(jsonString);
+            var json1 = FormRecoginzerSerializer.Serialize(obj1);
+            var obj2 = FormRecoginzerSerializer.Deserialize(json1);
+            var json2 = FormRecoginzerSerializer.Serialize(obj2);
+            Assert.Equal(json1, json2);
         }
     }
 }

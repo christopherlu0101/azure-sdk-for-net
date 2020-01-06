@@ -1,20 +1,29 @@
 ﻿using System;
-using System.Reflection;
+using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.Azure.CognitiveServices.FormRecognizer.Models;
-using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.models;
-using Azure;
-using Azure.Core;
-using System.IO;
+using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 {
+    internal static class StringExtension
+    {
+        public static string ToUpperCamelCasing(this string str)
+        {
+            return Char.ToUpperInvariant(str[0]) + str.Substring(1);
+        }
+
+        public static string ToLowerCamelCasing(this string str)
+        {
+            return Char.ToLowerInvariant(str[0]) + str.Substring(1);
+        }
+    }
+
     public class FormRecoginzerSerializer
     {
-        public static void Serialize(ResponseBody body)
+        public static string Serialize(ResponseBody body)
         {
             var stream = new MemoryStream();
             var writer = new Utf8JsonWriter(stream);
@@ -22,12 +31,8 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             writer.WriteStartObject();
             SerializeProperty(ref writer, typeof(ResponseBody), body);
             writer.WriteEndObject();
-            writer.Flush();            
-
-            // debug usage
-            string json = Encoding.UTF8.GetString(stream.ToArray());
-            Console.WriteLine(json);
-            // return Encoding.UTF8.GetString(stream.ToArray());
+            writer.Flush();                       
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
 
         public static void SerializeProperty(ref Utf8JsonWriter writer, Type type, object obj)
@@ -37,7 +42,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                 var value = property.GetValue(obj, null);
                 if (value != null)
                 {
-                    writer.WritePropertyName(property.Name);
+                    writer.WritePropertyName(property.Name.ToLowerCamelCasing());
                     SerializeObject(ref writer, property.PropertyType, value);
                 }
             }
@@ -75,17 +80,24 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     writer.WriteEndArray();
                 }
                 // Dictionary
-                else if (type.Name == typeof(IDictionary<string, object>).Name)
+                else if (type.Name == typeof(IDictionary<string, FieldValue>).Name)
                 {
                     // TODO : generalize FieldValue
-                    writer.WriteStartObject();
-                    foreach (var kv in (Dictionary<string, FieldValue>)value)
+                    if (type.FullName == typeof(IDictionary<string, FieldValue>).FullName)
                     {
-                        writer.WritePropertyName(kv.Key);
-                        var contentType = type.GetGenericArguments()[1];
-                        SerializeObject(ref writer, contentType, kv.Value);
+                        writer.WriteStartObject();
+                        foreach (var kv in (Dictionary<string, FieldValue>)value)
+                        {
+                            writer.WritePropertyName(kv.Key.ToLowerCamelCasing());
+                            var contentType = type.GetGenericArguments()[1];
+                            SerializeObject(ref writer, contentType, kv.Value);
+                        }
+                        writer.WriteEndObject();
                     }
-                    writer.WriteEndObject();
+                    else
+                    {
+                        throw new Exception($"Unsupport dictionary type : {type.FullName}");
+                    }                    
                 }
                 // Nullable
                 else if (type.Name == typeof(int?).Name)
@@ -108,47 +120,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             else if (type.Name == typeof(FieldValue).Name)
             {
                 writer.WriteStartObject();
-                foreach (var property in type.GetProperties())
-                {
-                    if (!property.Name.Contains("Value"))
-                    {
-                        var propertyValue = property.GetValue(value, null);
-                        if (propertyValue != null)
-                        {
-                            writer.WritePropertyName(property.Name);
-                            SerializeObject(ref writer, property.PropertyType, propertyValue);
-                        }
-                    }
-                }
-                var fieldValue = ((FieldValue)value);
-                var fieldValueType = fieldValue.Type;
-                switch (fieldValueType)
-                {
-                    case FieldValueType.Array:
-                        writer.WritePropertyName("ValueArray");
-                        SerializeObject(ref writer, fieldValue.ValueArray.GetType(), fieldValue.ValueArray);
-                        break;
-                    case FieldValueType.Object:
-                        writer.WritePropertyName("ValueObject");
-                        SerializeObject(ref writer, fieldValue.ValueObject.GetType(), fieldValue.ValueObject);
-                        break;
-                    case FieldValueType.Integer:
-                        writer.WriteNumber("ValueInteger", fieldValue.ValueInteger);
-                        break;
-                    case FieldValueType.Number:
-                        writer.WriteNumber("ValueNumber", fieldValue.ValueNumber);
-                        break;
-                    case FieldValueType.Date:
-                        writer.WriteString("ValueDate", fieldValue.ValueDate);
-                        break;
-                    case FieldValueType.Time:
-                        writer.WriteString("ValueTime", fieldValue.ValueTime);
-                        break;
-                    case FieldValueType.PhoneNumber:
-                    case FieldValueType.String:
-                        writer.WriteString("ValueString", fieldValue.ValueString);
-                        break;
-                }
+                SerializeFieldValue(ref writer, (FieldValue)value);
                 writer.WriteEndObject();
             }
             else
@@ -157,6 +129,52 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                 SerializeProperty(ref writer, type, value);
                 writer.WriteEndObject();
 
+            }
+        }
+
+        public static void SerializeFieldValue(ref Utf8JsonWriter writer, FieldValue fieldValue)
+        {
+            foreach (var property in typeof(FieldValue).GetProperties().OrderBy(p => p.Name).ToArray())
+            {
+                if (!property.Name.Contains("Value"))
+                {
+                    var propertyValue = property.GetValue(fieldValue, null);
+                    if (propertyValue != null)
+                    {
+                        writer.WritePropertyName(property.Name.ToLowerCamelCasing());
+                        SerializeObject(ref writer, property.PropertyType, propertyValue);
+                    }
+                }
+            }
+
+            switch (fieldValue.Type)
+            {
+                case FieldValueType.Array:
+                    writer.WritePropertyName("ValueArray".ToLowerCamelCasing());
+                    SerializeObject(ref writer, fieldValue.ValueArray.GetType(), fieldValue.ValueArray);
+                    break;
+                case FieldValueType.Object:
+                    writer.WritePropertyName("ValueObject".ToLowerCamelCasing());
+                    SerializeObject(ref writer, fieldValue.ValueObject.GetType(), fieldValue.ValueObject);
+                    break;
+                case FieldValueType.Integer:
+                    writer.WriteNumber("ValueInteger".ToLowerCamelCasing(), fieldValue.ValueInteger);
+                    break;
+                case FieldValueType.Number:
+                    writer.WriteNumber("ValueNumber".ToLowerCamelCasing(), fieldValue.ValueNumber);
+                    break;
+                case FieldValueType.Date:
+                    writer.WriteString("ValueDate".ToLowerCamelCasing(), fieldValue.ValueDate);
+                    break;
+                case FieldValueType.Time:
+                    writer.WriteString("ValueTime".ToLowerCamelCasing(), fieldValue.ValueTime);
+                    break;
+                case FieldValueType.PhoneNumber:
+                    writer.WriteString("ValuePhoneNumber".ToLowerCamelCasing(), fieldValue.ValuePhoneNumber);
+                    break;
+                case FieldValueType.String:
+                    writer.WriteString("ValueString".ToLowerCamelCasing(), fieldValue.ValueString);
+                    break;
             }
         }
 
@@ -170,9 +188,8 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    var name = reader.GetString();
-                    var upperCamelName = Char.ToUpperInvariant(name[0]) + name.Substring(1);
-                    var property = typeof(ResponseBody).GetProperty(upperCamelName);
+                    var name = reader.GetString();                    
+                    var property = typeof(ResponseBody).GetProperty(name.ToUpperCamelCasing());
                     if (property != null)
                     {
                         var propertyType = property.PropertyType;
@@ -360,8 +377,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                         break;
                     case JsonTokenType.PropertyName:
                         var name = reader.GetString();
-                        var upperCamelName = Char.ToUpperInvariant(name[0]) + name.Substring(1);
-                        var property = type.GetProperty(upperCamelName);
+                        var property = type.GetProperty(name.ToUpperCamelCasing());
                         if (property != null)
                         {
                             var propertyType = property.PropertyType;

@@ -1,7 +1,6 @@
 ﻿using System;
-using Microsoft.Azure.CognitiveServices.FormRecognizer.Models;
 
-namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.models
+namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
 {
     public class ResponseBody
     {

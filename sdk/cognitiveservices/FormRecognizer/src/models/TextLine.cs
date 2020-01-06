@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
+namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
 {
     public class TextLine
     {

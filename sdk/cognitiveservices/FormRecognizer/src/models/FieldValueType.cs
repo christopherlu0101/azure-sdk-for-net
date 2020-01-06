@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
+namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
 {
     public enum FieldValueType
     {

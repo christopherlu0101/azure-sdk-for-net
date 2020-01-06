@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Azure.CognitiveServices.FormRecognizer.Models
+namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
 {
     public class FieldValue
     {
