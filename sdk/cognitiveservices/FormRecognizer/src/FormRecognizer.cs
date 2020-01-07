@@ -1,139 +1,141 @@
-﻿using System;
-using System.Collections.Generic;
+﻿/*
+BUGS:
+- LRO examples missing virtual async
+- LRO example.  Should we return Response<OperationStatus> or OperationStatus directly?  What should the RawResponse be?
+- Why doesn't DeleteKeyOperation.cs implement GetStatus?  It doesn't appear to follow the pattern.
+- WriteNumberValue() doesn't support roundtrip format.
+*/
+
+using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
+using System.Text.Json;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
-using System.Text;
-using System.Text.Json;
+using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 {
+
+    // public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync();
+    // public virtual asyncTask<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(string operationId);
+    // public virtual Operation<AnalyzeResult> StartAnalyzeReceipt();
+    // public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(string operationId);
+
+    // public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeLayoutAsync();
+    // public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeLayoutAsync(string operationId);
+    // public virtual Operation<AnalyzeResult> StartAnalyzeLayout();
+    // public virtual Operation<AnalyzeResult> StartAnalyzeLayout(string operationId);
+
+    internal static class RouteNameScope
+    {
+        public const string FormRecognizerRoute = "formrecognizer/";
+        public const string AnalyzeReceiptRoute = "/prebuilt/receipt/analyze/";
+        public const string GetReceiptRoute = "/prebuilt/receipt/analyzeResults/";
+    }
+
+    public enum ContentType { Jpeg, Tiff, Png, Pdf, Json }
+
     public class FormRecognizerClient
     {
-        private FormRecognizerCredential _formRecognizerCredential;
-        private HttpPipeline _httpPipeline;
-        private RequestUriBuilder _uriBuilder;
-        private string _endpoint;
+        private readonly string _subscriptionKey;
+        private readonly FormRecognizerHttpPipeline _httpPipeline;     
+        private readonly Uri _baseUri;
+        private readonly FormRecognizerClientOptions _options;
+        private readonly string _apiVersion;        
 
-        public FormRecognizerClient(string endpoint, string subscriptionKey)
+        public FormRecognizerClient(Uri baseUri, string subscriptionKey, FormRecognizerClientOptions options = null)
         {
-            _formRecognizerCredential = new FormRecognizerCredential(subscriptionKey);
-            _httpPipeline = new HttpPipeline(new HttpClientTransport());
-            _endpoint = endpoint;
-            _uriBuilder = new RequestUriBuilder();
+            _subscriptionKey = subscriptionKey;
+            _options = options ?? new FormRecognizerClientOptions();
+            _apiVersion = _options.GetVersionString();
+            _baseUri = baseUri;
+            _httpPipeline = new FormRecognizerHttpPipeline(HttpPipelineBuilder.Build(_options), _baseUri, _subscriptionKey, _apiVersion, _options);
         }
 
-        public async Task<Response<string>> StartAnalyzeReceiptAsync(Stream fileStream, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            using (var request = _httpPipeline.CreateRequest())
-            {
-                request.Content = RequestContent.Create(fileStream);
-                request.Headers.Add("Content-Type", "application/octet-stream");
+        public async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Stream fileStream, ContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
+        {            
+            using (var request = _httpPipeline.CreateRequest(RequestMethod.Post, contentType, RouteNameScope.AnalyzeReceiptRoute))
+            {             
+                request.Content = RequestContent.Create(fileStream);                                
                 return await StartAnalyzeReceiptAsync(request, cancellationToken);
             }                
         }
 
-        public async Task<Response<string>> StartAnalyzeReceiptAsync(string imageUri, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Uri imageUri, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var request = _httpPipeline.CreateRequest())
+            using (var request = _httpPipeline.CreateRequest(RequestMethod.Post, ContentType.Json, RouteNameScope.AnalyzeReceiptRoute))
             {
-                var json = JsonSerializer.Serialize<AnalyzeUrlRequest>(new AnalyzeUrlRequest() { source = new Uri(imageUri) });
-                request.Content = RequestContent.Create(new MemoryStream(Encoding.UTF8.GetBytes(json)));
-                request.Headers.Add("Content-Type", "application/json");
+                var json = JsonSerializer.Serialize<AnalyzeUrlRequest>(new AnalyzeUrlRequest() { source = imageUri });
+                request.Content = RequestContent.Create(Encoding.UTF8.GetBytes(json));
                 return await StartAnalyzeReceiptAsync(request, cancellationToken);
             }
         }
 
-        private async Task<Response<string>> StartAnalyzeReceiptAsync(Request request, CancellationToken cancellationToken)
-        {
-            _uriBuilder.Reset(new Uri((_endpoint + (_endpoint.EndsWith("/") ? "" : "/") + "prebuilt/receipt/analyze")));
-            await _formRecognizerCredential.ProcessHttpRequestAsync(request, cancellationToken);
-            request.Method = RequestMethod.Post;
-            request.Uri = _uriBuilder;     
-            
-            var response = await _httpPipeline.SendRequestAsync(request, cancellationToken).ConfigureAwait(false);
-            if (response.Status == 202)
-            {
-                string location;
-                response.Headers.TryGetValue("Operation-Location", out location);
-                return Response.FromValue(GetOperationId(location), response);
-            }
-            else
-            {
-                throw await response.CreateRequestFailedExceptionAsync();
-            }
-        }
 
-        public async Task<Response<string>> GetReceiptAnalyzeResultAsync(string guid, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Request request, CancellationToken cancellationToken)
         {
-            using (var request = _httpPipeline.CreateRequest())
+            var response = await _httpPipeline.GetResponseAsync(request, cancellationToken);            
+            switch (response.Status)
             {
-                _uriBuilder.Reset(new Uri((_endpoint + (_endpoint.EndsWith("/") ? "" : "/") + "prebuilt/receipt/analyzeResults/" + guid)));
-                await _formRecognizerCredential.ProcessHttpRequestAsync(request, cancellationToken);
-                request.Method = RequestMethod.Get;
-                request.Uri = _uriBuilder;                
+                // See LRO implementation.
+                // - https://github.com/Azure/azure-sdk-for-net/blob/0be76a78b6e8cb86f1316d158fa63b3595763f64/sdk/keyvault/Azure.Security.KeyVault.Keys/src/DeleteKeyOperation.cs
+                // - https://github.com/Azure/azure-sdk-for-net/blob/0be76a78b6e8cb86f1316d158fa63b3595763f64/sdk/keyvault/Azure.Security.KeyVault.Keys/src/KeyClient.cs#L557
 
-                var response = await _httpPipeline.SendRequestAsync(request, cancellationToken).ConfigureAwait(false);
-                if (response.Status == 200)
-                {             
-                    using (var reader = new StreamReader(response.ContentStream))
-                    {                        
-                        var content = reader.ReadToEnd();
-                        //FormRecoginzerSerializer.Deserialize(content);
-                        FormRecoginzerSerializer.Deserialize(content);
-                        return Response.FromValue(content, response);
+                case 202:
+                    if (response.Headers.TryGetValue("Operation-Location", out string location))
+                    {
+                        var getResultRequest = _httpPipeline.CreateRequest(RequestMethod.Get, ContentType.Json, RouteNameScope.GetReceiptRoute);
+                        getResultRequest.Uri.AppendPath(location.Split('/').Last());
+                        return new AnalyzeReceiptOperation(_httpPipeline, getResultRequest, location);                     
                     }
-                }
-                else
-                {
+                    else
+                    {
+                        throw await response.CreateRequestFailedExceptionAsync();
+                    }
+                default:
                     throw await response.CreateRequestFailedExceptionAsync();
-                }
             }
         }
-
-        public static string GetOperationId(string uri)
-        {
-            if (string.IsNullOrEmpty(uri))
-            {
-                throw new ArgumentNullException(nameof(uri));
-            }
-
-            var parts = uri.Trim(new[] { '/' }).Split('/');
-            if (parts.Length == 0)
-            {
-                throw new ArgumentException("Invalid Operation URL.");
-            }
-            return parts[parts.Length - 1];
-        }
-
     }
+   
+    //public async Task<Response<string>> GetReceiptAnalyzeResultAsync(string guid, CancellationToken cancellationToken = default(CancellationToken))
+    //{
+    //    // TODO: This code should live inside AnalyzeOperation.
+    //    using (var request = _httpPipeline.CreateRequest())
+    //    {
+    //        // Rewrite
+    //        _uriBuilder.Reset(new Uri((_endpoint + (_endpoint.EndsWith("/") ? "" : "/") + "prebuilt/receipt/analyzeResults/" + guid)));
+    //        await _formRecognizerCredential.ProcessHttpRequestAsync(request, cancellationToken);
+    //        request.Method = RequestMethod.Get;
+    //        request.Uri = _uriBuilder;                
+
+    //        var response = await _httpPipeline.SendRequestAsync(request, cancellationToken).ConfigureAwait(false);
+    //        if (response.Status == 200)
+    //        {
+    //            // TODO: Check for null ContentStream
+    //            using (var reader = new StreamReader(response.ContentStream))
+    //            {
+    //                // TODO: Can we deserialize JSON directly from stream?
+    //                var content = reader.ReadToEnd();
+    //                FormRecognizerSerializer.Deserialize(content);
+    //                // TODO: Replace with operation, passing in Operation-Location GUID.
+    //                // TODO: Should we use GUID or URI as ID?
+    //                return Response.FromValue(content, response);
+
+    //                // TODO: How do we encode Status, CreatedDateTime, LastUpdatedDateTime?
+    //            }
+    //        }
+    //    }
+    //}
+
 
     public class AnalyzeUrlRequest
     {
         public Uri source { get; set; }
-    }
-
-    public class FormRecognizerCredential
-    {
-        private readonly string _subscriptionKey;
-        private const string ApiKeyHeader = "Ocp-Apim-Subscription-Key";
-
-        public FormRecognizerCredential(string subscriptionKey)
-        {
-            _subscriptionKey = subscriptionKey;
-        }
-
-        public Task ProcessHttpRequestAsync(Request request, CancellationToken cancellationToken)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-            request.Headers.Add(ApiKeyHeader, this._subscriptionKey);
-            return Task.FromResult<object>(null);
-        }
     }
 }

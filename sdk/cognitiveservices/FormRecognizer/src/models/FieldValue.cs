@@ -1,8 +1,5 @@
-using Microsoft.Rest;
-using Newtonsoft.Json;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
 {
@@ -20,7 +17,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
         public string Text { get; set; }
         public IList<double> BoundingBox { get; set; }
         public double? Confidence { get; set; }
-        public IList<string> Elements { get; set; }
+        public IList<string> Elements { get; set; }               
         public int Page { get; set; }
     }
 }

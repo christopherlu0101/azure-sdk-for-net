@@ -21,7 +21,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         }
     }
 
-    public class FormRecoginzerSerializer
+    public class FormRecognizerSerializer
     {
         # region serialization        
         public static string Serialize(ResponseBody body)
@@ -215,10 +215,10 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                 if (reader.Read() && reader.TokenType == JsonTokenType.String)
                 {
 
-                    var genericParseEnum = typeof(FormRecoginzerSerializer)
+                    var genericParseEnum = typeof(FormRecognizerSerializer)
                         .GetMethod("ParseEnum")
                         .MakeGenericMethod(type);
-                    return genericParseEnum.Invoke(new FormRecoginzerSerializer(), new object[] { reader.GetString() });
+                    return genericParseEnum.Invoke(new FormRecognizerSerializer(), new object[] { reader.GetString() });
 
                 }
                 throw new Exception($"Invalid {name} property.");
@@ -247,7 +247,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     var contentType = type.GetGenericArguments()[0];
                     if (reader.Read() && reader.TokenType == JsonTokenType.StartArray)
                     {
-                        var genericParseArray = typeof(FormRecoginzerSerializer)
+                        var genericParseArray = typeof(FormRecognizerSerializer)
                             .GetMethod("ParseArray")
                             .MakeGenericMethod(contentType);                        
                         var delegator = (GenericDelegate)Delegate.CreateDelegate(typeof(GenericDelegate), genericParseArray);
@@ -262,7 +262,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     var contentType = type.GetGenericArguments()[1];
                     if (reader.Read() && reader.TokenType == JsonTokenType.StartObject)
                     {
-                        var genericParseStringDictionary = typeof(FormRecoginzerSerializer)
+                        var genericParseStringDictionary = typeof(FormRecognizerSerializer)
                             .GetMethod("ParseStringDictionary")
                             .MakeGenericMethod(contentType);
                         var delegator = (GenericDelegate)Delegate.CreateDelegate(typeof(GenericDelegate), genericParseStringDictionary);
