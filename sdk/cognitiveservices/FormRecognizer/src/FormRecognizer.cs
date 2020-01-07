@@ -43,7 +43,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
     public class FormRecognizerClient
     {
         private readonly string _subscriptionKey;
-        private readonly FormRecognizerHttpPipeline _httpPipeline;     
+        private readonly FormRecognizerHttpPipeline _formRecognizerPipeline;
         private readonly Uri _baseUri;
         private readonly FormRecognizerClientOptions _options;
         private readonly string _apiVersion;        
@@ -54,32 +54,25 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             _options = options ?? new FormRecognizerClientOptions();
             _apiVersion = _options.GetVersionString();
             _baseUri = baseUri;
-            _httpPipeline = new FormRecognizerHttpPipeline(HttpPipelineBuilder.Build(_options), _baseUri, _subscriptionKey, _apiVersion, _options);
+            _formRecognizerPipeline = new FormRecognizerHttpPipeline(_baseUri, _subscriptionKey, _apiVersion, _options);
         }
 
         public async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Stream fileStream, ContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
         {            
-            using (var request = _httpPipeline.CreateRequest(RequestMethod.Post, contentType, RouteNameScope.AnalyzeReceiptRoute))
-            {             
-                request.Content = RequestContent.Create(fileStream);                                
-                return await StartAnalyzeReceiptAsync(request, cancellationToken);
-            }                
+            var request = _formRecognizerPipeline.CreateRequest(fileStream, contentType, RequestMethod.Post, RouteNameScope.AnalyzeReceiptRoute);                                                    
+            return await StartAnalyzeReceiptAsync(request, cancellationToken);                          
         }
 
         public async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Uri imageUri, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var request = _httpPipeline.CreateRequest(RequestMethod.Post, ContentType.Json, RouteNameScope.AnalyzeReceiptRoute))
-            {
-                var json = JsonSerializer.Serialize<AnalyzeUrlRequest>(new AnalyzeUrlRequest() { source = imageUri });
-                request.Content = RequestContent.Create(Encoding.UTF8.GetBytes(json));
-                return await StartAnalyzeReceiptAsync(request, cancellationToken);
-            }
+            var request = _formRecognizerPipeline.CreateRequest(imageUri, RequestMethod.Post, RouteNameScope.AnalyzeReceiptRoute);
+            return await StartAnalyzeReceiptAsync(request, cancellationToken);                
         }
 
 
         private async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Request request, CancellationToken cancellationToken)
         {
-            var response = await _httpPipeline.GetResponseAsync(request, cancellationToken);            
+            var response = await _formRecognizerPipeline.GetResponseAsync(request, cancellationToken);            
             switch (response.Status)
             {
                 // See LRO implementation.
@@ -87,11 +80,10 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                 // - https://github.com/Azure/azure-sdk-for-net/blob/0be76a78b6e8cb86f1316d158fa63b3595763f64/sdk/keyvault/Azure.Security.KeyVault.Keys/src/KeyClient.cs#L557
 
                 case 202:
-                    if (response.Headers.TryGetValue("Operation-Location", out string location))
+                    if (response.Headers.TryGetValue("Operation-Location", out string locationUri))
                     {
-                        var getResultRequest = _httpPipeline.CreateRequest(RequestMethod.Get, ContentType.Json, RouteNameScope.GetReceiptRoute);
-                        getResultRequest.Uri.AppendPath(location.Split('/').Last());
-                        return new AnalyzeReceiptOperation(_httpPipeline, getResultRequest, location);                     
+                        var getResultRequest = _formRecognizerPipeline.CreateRequest(new Uri(locationUri), RequestMethod.Get);
+                        return new AnalyzeReceiptOperation(_formRecognizerPipeline, getResultRequest);                     
                     }
                     else
                     {

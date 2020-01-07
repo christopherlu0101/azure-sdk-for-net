@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -16,20 +19,52 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         private readonly FormRecognizerClientOptions _options;
         private readonly string _apiVersion;
 
-        public FormRecognizerHttpPipeline(HttpPipeline httpPipeline, Uri baseUri, string subscriptionKey, string apiVersion, FormRecognizerClientOptions options)
-        {
-            _httpPipeline = httpPipeline;
+        public FormRecognizerHttpPipeline(Uri baseUri, string subscriptionKey, string apiVersion, FormRecognizerClientOptions options)
+        {            
             _subscriptionKey = subscriptionKey;            
             _apiVersion = apiVersion;
             _baseUri = baseUri;
             _options = options;
+            _httpPipeline = HttpPipelineBuilder.Build(_options);
         }
 
-        public Request CreateRequest(RequestMethod method, ContentType contentType, string route)
+        public Request CreateRequest(Stream fileStream, ContentType contentType, RequestMethod method, string route)
+        {
+            var request = CreateRequest(contentType, method, route);
+            request.Content = RequestContent.Create(fileStream);
+            return request;
+        }
+
+        public Request CreateRequest(Uri imageUri, RequestMethod method, string route)
+        {
+            var request = CreateRequest(ContentType.Json, method, route);
+            var jsonString = JsonSerializer.Serialize<AnalyzeUrlRequest>(new AnalyzeUrlRequest() { source = imageUri });
+            request.Content = RequestContent.Create(Encoding.UTF8.GetBytes(jsonString));
+            return request;
+        }
+
+        public Request CreateRequest(ContentType contentType, RequestMethod method, string uriRoute)
         {
             Request request = _httpPipeline.CreateRequest();
-            ProcessHeader(request, contentType, route);
+            ProcessApiKey(request);
+            ProcessContentType(request, contentType);
+            ProcessUri(request, uriRoute);
             request.Method = method;
+            return request;
+        }
+
+        public Request CreateRequest(Uri uri, RequestMethod method)
+        {
+            var request = CreateRequest();
+            request.Uri.Reset(uri);
+            request.Method = method;
+            return request;
+        }
+
+        public Request CreateRequest()
+        {
+            Request request = _httpPipeline.CreateRequest();
+            ProcessApiKey(request);
             return request;
         }
 
@@ -38,24 +73,27 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             return GetResponseAsync(request, cancellationToken).Result;
         }
 
-        public async ValueTask<Response> GetResponseAsync(Request request, CancellationToken cancellationToken = default)
+        public async Task<Response> GetResponseAsync(Request request, CancellationToken cancellationToken = default)
         {
             return await _httpPipeline.SendRequestAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
-        private void ProcessHeader(Request request, ContentType contentType, string route)
+        private void ProcessContentType(Request request, ContentType contentType)
         {
             request.Headers.Add("Content-Type", GetContentTypeString(contentType));
-            request.Headers.Add("Ocp-Apim-Subscription-Key", _subscriptionKey);
-            BuildUriForRoute(route, request.Uri);
         }
 
-        private void BuildUriForRoute(string route, RequestUriBuilder builder)
+        private void ProcessApiKey(Request request)
         {
-            builder.Reset(_baseUri);
-            builder.AppendPath(RouteNameScope.FormRecognizerRoute, escape: false);
-            builder.AppendPath(_apiVersion, escape: false);
-            builder.AppendPath(route, escape: false);
+            request.Headers.Add("Ocp-Apim-Subscription-Key", _subscriptionKey);
+        }
+        
+        private void ProcessUri(Request request, string uriRoute)
+        {
+            request.Uri.Reset(_baseUri);
+            request.Uri.AppendPath(RouteNameScope.FormRecognizerRoute, escape: false);
+            request.Uri.AppendPath(_apiVersion, escape: false);
+            request.Uri.AppendPath(uriRoute, escape: false);
         }
 
         private string GetContentTypeString(ContentType contentType)

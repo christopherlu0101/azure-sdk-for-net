@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,11 +13,11 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
     public class AnalyzeReceiptOperation : Operation<AnalyzeResult>
     {
         public override string Id => _location;
-        public override AnalyzeResult Value => throw new NotImplementedException();
+        public override AnalyzeResult Value => _value;
         public override bool HasCompleted => _completed;
         public override bool HasValue => (Value != null);
 
-        private readonly FormRecognizerHttpPipeline _httpPipeline;
+        private readonly FormRecognizerHttpPipeline _formRecognizerPipeline;
         private readonly string _location;
         private static readonly TimeSpan s_defaultPollingInterval = TimeSpan.FromSeconds(2);
 
@@ -25,19 +26,21 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         private bool _completed;
         private AnalyzeResult _value;
 
-        internal AnalyzeReceiptOperation(FormRecognizerHttpPipeline httpPipeline, Request request, string location)
+        internal AnalyzeReceiptOperation(FormRecognizerHttpPipeline formRecognizerPipeline, Request request)
         {
-            _httpPipeline = httpPipeline;
+            _formRecognizerPipeline = formRecognizerPipeline;
             _request = request;
-            _location = location;
+            _location = request.Uri.ToString().Split('/').Last();
             _response = null;
+            _value = null;
+            _completed = false;
         }
 
         public override Response GetRawResponse()
         {
             if (_response == null)
             {
-                _response = _httpPipeline.GetResponse(_request);
+                _response = _formRecognizerPipeline.GetResponse(_request);
                 return _response;
             }
             else
@@ -63,7 +66,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             {
                 try
                 {
-                    _response = await _httpPipeline.GetResponseAsync(_request, cancellationToken);
+                    _response = await _formRecognizerPipeline.GetResponseAsync(_request, cancellationToken);
                     _completed = CheckCompleted(_response);
                 }
                 catch (Exception e)
