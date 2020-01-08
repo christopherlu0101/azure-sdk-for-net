@@ -1,79 +1,37 @@
-using System.Runtime.Serialization;
+using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
 {
+    [JsonConverter(typeof(FieldValueTypeConverter))]
     public enum FieldValueType
     {
-        [EnumMember(Value = "string")]
-        String,
-        [EnumMember(Value = "date")]
+        String,        
         Date,
-        [EnumMember(Value = "time")]
         Time,
-        [EnumMember(Value = "phoneNumber")]
         PhoneNumber,
-        [EnumMember(Value = "number")]
         Number,
-        [EnumMember(Value = "integer")]
         Integer,
-        [EnumMember(Value = "array")]
         Array,
-        [EnumMember(Value = "object")]
         Object
     }
-    internal static class FieldValueTypeEnumExtension
+
+    public class FieldValueTypeConverter : JsonConverter<FieldValueType>
     {
-        internal static string ToSerializedValue(this FieldValueType? value)
+        public override FieldValueType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return value == null ? null : ((FieldValueType)value).ToSerializedValue();
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                Enum.TryParse(reader.GetString(), true, out FieldValueType fieldValueType);
+                return fieldValueType;
+            }                            
+            throw new JsonException();
         }
 
-        internal static string ToSerializedValue(this FieldValueType value)
+        public override void Write(Utf8JsonWriter writer, FieldValueType fieldValueType, JsonSerializerOptions options)
         {
-            switch( value )
-            {
-                case FieldValueType.String:
-                    return "string";
-                case FieldValueType.Date:
-                    return "date";
-                case FieldValueType.Time:
-                    return "time";
-                case FieldValueType.PhoneNumber:
-                    return "phoneNumber";
-                case FieldValueType.Number:
-                    return "number";
-                case FieldValueType.Integer:
-                    return "integer";
-                case FieldValueType.Array:
-                    return "array";
-                case FieldValueType.Object:
-                    return "object";
-            }
-            return null;
-        }
-
-        internal static FieldValueType? ParseFieldValueType(this string value)
-        {
-            switch( value )
-            {
-                case "string":
-                    return FieldValueType.String;
-                case "date":
-                    return FieldValueType.Date;
-                case "time":
-                    return FieldValueType.Time;
-                case "phoneNumber":
-                    return FieldValueType.PhoneNumber;
-                case "number":
-                    return FieldValueType.Number;
-                case "integer":
-                    return FieldValueType.Integer;
-                case "array":
-                    return FieldValueType.Array;
-                case "object":
-                    return FieldValueType.Object;
-            }
-            return null;
+            writer.WriteStringValue(CasingHelper.ToLowerCamelCasing(fieldValueType.ToString()));
         }
     }
 }

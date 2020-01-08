@@ -13,7 +13,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
     public class AnalyzeReceiptOperation : Operation<AnalyzeResult>
     {
         public override string Id => _location;
-        public override AnalyzeResult Value => _value;
+        public override AnalyzeResult Value => _value?.AnalyzeResult;
         public override bool HasCompleted => _completed;
         public override bool HasValue => (Value != null);
 
@@ -24,7 +24,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         private Request _request;
         private Response _response;
         private bool _completed;
-        private AnalyzeResult _value;
+        private ResponseBody _value;
 
         internal AnalyzeReceiptOperation(FormRecognizerHttpPipeline formRecognizerPipeline, Request request)
         {
@@ -85,10 +85,9 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     using (var reader = new StreamReader(response.ContentStream))
                     {
                         // TODO: Can we deserialize JSON directly from stream?
-                        var content = reader.ReadToEnd();
-                        _value = JsonSerializer.Deserialize<AnalyzeResult>(content);
+                        _value = FormRecognizerSerializer.Deserialize(reader.ReadToEnd());
                     }
-                    return true;
+                    return _value.Status == "succeeded";
                 case 403: // Access denied but proof the key was deleted.
                     return true;
                 case 404:

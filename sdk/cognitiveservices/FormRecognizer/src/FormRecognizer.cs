@@ -69,7 +69,6 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             return await StartAnalyzeReceiptAsync(request, cancellationToken);                
         }
 
-
         private async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Request request, CancellationToken cancellationToken)
         {
             var response = await _formRecognizerPipeline.GetResponseAsync(request, cancellationToken);            
@@ -93,41 +92,5 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     throw await response.CreateRequestFailedExceptionAsync();
             }
         }
-    }
-   
-    //public async Task<Response<string>> GetReceiptAnalyzeResultAsync(string guid, CancellationToken cancellationToken = default(CancellationToken))
-    //{
-    //    // TODO: This code should live inside AnalyzeOperation.
-    //    using (var request = _httpPipeline.CreateRequest())
-    //    {
-    //        // Rewrite
-    //        _uriBuilder.Reset(new Uri((_endpoint + (_endpoint.EndsWith("/") ? "" : "/") + "prebuilt/receipt/analyzeResults/" + guid)));
-    //        await _formRecognizerCredential.ProcessHttpRequestAsync(request, cancellationToken);
-    //        request.Method = RequestMethod.Get;
-    //        request.Uri = _uriBuilder;                
-
-    //        var response = await _httpPipeline.SendRequestAsync(request, cancellationToken).ConfigureAwait(false);
-    //        if (response.Status == 200)
-    //        {
-    //            // TODO: Check for null ContentStream
-    //            using (var reader = new StreamReader(response.ContentStream))
-    //            {
-    //                // TODO: Can we deserialize JSON directly from stream?
-    //                var content = reader.ReadToEnd();
-    //                FormRecognizerSerializer.Deserialize(content);
-    //                // TODO: Replace with operation, passing in Operation-Location GUID.
-    //                // TODO: Should we use GUID or URI as ID?
-    //                return Response.FromValue(content, response);
-
-    //                // TODO: How do we encode Status, CreatedDateTime, LastUpdatedDateTime?
-    //            }
-    //        }
-    //    }
-    //}
-
-
-    public class AnalyzeUrlRequest
-    {
-        public Uri source { get; set; }
-    }
+    }  
 }

@@ -16,7 +16,6 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         }
 
         internal ServiceVersion Version { get; }
-
         internal const ServiceVersion LatestVersion = ServiceVersion.v2_0_preview;
 
         internal string GetVersionString()

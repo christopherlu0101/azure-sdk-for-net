@@ -17,11 +17,11 @@ namespace FormRecognizerSDK.Tests
             var apiKey = "184654c847d54432b8301a4b76f63045";
             var client = new FormRecognizerClient(new Uri(endpoint), apiKey);
 
-            using (FileStream stream = new FileStream(@"D:/Data/Receipt_044_065.jpg", FileMode.Open))
+            using (FileStream stream = new FileStream(@"D:/Data/Receipt_000_000.jpg", FileMode.Open))
             {
                 var operation = client.StartAnalyzeReceiptAsync(stream, ContentType.Jpeg).Result;
-                Console.WriteLine(operation.UpdateStatus());
-                Console.WriteLine(operation.Value);
+                var result = operation.WaitForCompletionAsync().Result;
+                Console.WriteLine(result);
             }
         }
 
@@ -38,16 +38,14 @@ namespace FormRecognizerSDK.Tests
         [Fact]
         public void offlineTest()
         {
-            var jsonString = File.ReadAllText(@"TestImages/json1.json");
-
-            var a = JsonSerializer.Deserialize<ResponseBody>(jsonString);
-            var b = JsonSerializer.Serialize(a);
-
-            //var obj1 = FormRecognizerSerializer.Deserialize(jsonString);
-            //var json1 = FormRecognizerSerializer.Serialize(obj1);
-            //var obj2 = FormRecognizerSerializer.Deserialize(json1);
-            //var json2 = FormRecognizerSerializer.Serialize(obj2);
-            //Assert.Equal(json1, json2);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                IgnoreNullValues = true
+            };
+            var jsonString = File.ReadAllText(@"TestImages/json1.json");           
+            var a = FormRecognizerSerializer.Deserialize(jsonString, options);
+            var b = FormRecognizerSerializer.Serialize(a, options);
         }
     }
 }

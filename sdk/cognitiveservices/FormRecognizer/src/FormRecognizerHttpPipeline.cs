@@ -114,5 +114,9 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     throw new Exception("Unsupported ContentType.");
             }
         }
+        private class AnalyzeUrlRequest
+        {
+            public Uri source { get; set; }
+        }
     }
 }
