@@ -10,7 +10,8 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         private static JsonSerializerOptions _defaultOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            IgnoreNullValues = true
+            IgnoreNullValues = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
         public static ResponseBody Deserialize(string jsonString, JsonSerializerOptions options = null)

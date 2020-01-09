@@ -41,7 +41,8 @@ namespace FormRecognizerSDK.Tests
             var options = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                IgnoreNullValues = true
+                IgnoreNullValues = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             };
             var jsonString = File.ReadAllText(@"TestImages/json1.json");           
             var a = FormRecognizerSerializer.Deserialize(jsonString, options);

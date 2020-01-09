@@ -10,8 +10,18 @@ using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 {
+    public enum OperationStatus
+    {
+        NotStarted,
+        Running,
+        Succeeded,
+        Cancelled,
+        Failed,
+    }
+
     public class AnalyzeReceiptOperation : Operation<AnalyzeResult>
     {
+
         public override string Id => _location;
         public override AnalyzeResult Value => _value?.AnalyzeResult;
         public override bool HasCompleted => _completed;
@@ -88,10 +98,6 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                         _value = FormRecognizerSerializer.Deserialize(reader.ReadToEnd());
                     }
                     return _value.Status == "succeeded";
-                case 403: // Access denied but proof the key was deleted.
-                    return true;
-                case 404:
-                    return false;
                 default:
                     throw response.CreateRequestFailedException();
             }
