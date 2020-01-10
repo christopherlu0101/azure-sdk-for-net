@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
 using System.Text.Json;
+using System.Net.Mime;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -54,24 +55,31 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             _options = options ?? new FormRecognizerClientOptions();
             _apiVersion = _options.GetVersionString();
             _baseUri = baseUri;
-            _formRecognizerPipeline = new FormRecognizerHttpPipeline(_baseUri, _subscriptionKey, _apiVersion, _options);
+            _formRecognizerPipeline = new FormRecognizerHttpPipeline(_subscriptionKey, _options);
         }
 
         public async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Stream fileStream, ContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
         {            
-            var request = _formRecognizerPipeline.CreateRequest(fileStream, contentType, RequestMethod.Post, RouteNameScope.AnalyzeReceiptRoute);                                                    
+            var request = _formRecognizerPipeline.CreateRequest();
+            ProcessContentType(request, contentType);
+            request.Content = RequestContent.Create(fileStream);
             return await StartAnalyzeReceiptAsync(request, cancellationToken);                          
         }
 
         public async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Uri imageUri, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var request = _formRecognizerPipeline.CreateRequest(imageUri, RequestMethod.Post, RouteNameScope.AnalyzeReceiptRoute);
+        {            
+            var request = _formRecognizerPipeline.CreateRequest();
+            ProcessContentType(request, ContentType.Json);
+            var jsonString = JsonSerializer.Serialize<AnalyzeUrlRequest>(new AnalyzeUrlRequest() { source = imageUri });
+            request.Content = RequestContent.Create(Encoding.UTF8.GetBytes(jsonString));
             return await StartAnalyzeReceiptAsync(request, cancellationToken);                
         }
 
         private async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Request request, CancellationToken cancellationToken)
         {
-            var response = await _formRecognizerPipeline.GetResponseAsync(request, cancellationToken);            
+            request.Method = RequestMethod.Post;
+            ProcessUri(request, RouteNameScope.AnalyzeReceiptRoute);
+            var response = await _formRecognizerPipeline.SendRequestAsync(request, cancellationToken);            
             switch (response.Status)
             {
                 // See LRO implementation.
@@ -81,7 +89,9 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                 case 202:
                     if (response.Headers.TryGetValue("Operation-Location", out string locationUri))
                     {
-                        var getResultRequest = _formRecognizerPipeline.CreateRequest(new Uri(locationUri), RequestMethod.Get);
+                        var getResultRequest  =_formRecognizerPipeline.CreateRequest();
+                        getResultRequest.Uri.Reset(new Uri(locationUri));
+                        getResultRequest.Method = RequestMethod.Get;
                         return new AnalyzeReceiptOperation(_formRecognizerPipeline, getResultRequest);                     
                     }
                     else
@@ -91,6 +101,43 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                 default:
                     throw await response.CreateRequestFailedExceptionAsync();
             }
+        }
+
+
+        private void ProcessContentType(Request request, ContentType contentType)
+        {
+            request.Headers.Add("Content-Type", GetContentTypeString(contentType));
+        }
+
+        private void ProcessUri(Request request, string uriRoute)
+        {
+            request.Uri.Reset(_baseUri);
+            request.Uri.AppendPath(RouteNameScope.FormRecognizerRoute, escape: false);
+            request.Uri.AppendPath(_apiVersion, escape: false);
+            request.Uri.AppendPath(uriRoute, escape: false);
+        }
+
+        private string GetContentTypeString(ContentType contentType)
+        {
+            switch (contentType)
+            {
+                case ContentType.Jpeg:
+                    return MediaTypeNames.Image.Jpeg;
+                case ContentType.Tiff:
+                    return MediaTypeNames.Image.Tiff;
+                case ContentType.Png:
+                    return "image/png";
+                case ContentType.Pdf:
+                    return MediaTypeNames.Application.Pdf;
+                case ContentType.Json:
+                    return "application/json";
+                default:
+                    throw new Exception("Unsupported ContentType.");
+            }
+        }
+        private class AnalyzeUrlRequest
+        {
+            public Uri source { get; set; }
         }
     }  
 }

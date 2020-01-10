@@ -48,15 +48,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 
         public override Response GetRawResponse()
         {
-            if (_response == null)
-            {
-                _response = _formRecognizerPipeline.GetResponse(_request);
-                return _response;
-            }
-            else
-            {
-                return _response;
-            }
+            return _response;        
         }
 
         public override ValueTask<Response<AnalyzeResult>> WaitForCompletionAsync(CancellationToken cancellationToken = default) =>
@@ -76,7 +68,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             {
                 try
                 {
-                    _response = await _formRecognizerPipeline.GetResponseAsync(_request, cancellationToken);
+                    _response = await _formRecognizerPipeline.SendRequestAsync(_request, cancellationToken);
                     _completed = CheckCompleted(_response);
                 }
                 catch (Exception e)
