@@ -40,7 +40,9 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         {
             _formRecognizerPipeline = formRecognizerPipeline;
             _request = request;
-            _location = request.Uri.ToString().Split('/').Last();
+            // Id should be Uri or Guid?
+            //_location = request.Uri.ToString().Split('/').Last();
+            _location = request.Uri.ToString();
             _response = null;
             _value = null;
             _completed = false;
@@ -91,7 +93,7 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                     }
                     return _value.Status == "succeeded";
                 default:
-                    throw response.CreateRequestFailedException();
+                    return true;
             }
         }
     }

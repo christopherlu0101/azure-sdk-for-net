@@ -17,19 +17,19 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             _httpPipeline = HttpPipelineBuilder.Build(options);
         }
 
-        public Request CreateRequest()
+        public virtual Request CreateRequest()
         {
             Request request = _httpPipeline.CreateRequest();
             ProcessApiKey(request);
             return request;
         }
 
-        public Response SendRequest(Request request, CancellationToken cancellationToken = default)
+        public virtual Response SendRequest(Request request, CancellationToken cancellationToken = default)
         {
             return SendRequestAsync(request, cancellationToken).Result;
         }
 
-        public async Task<Response> SendRequestAsync(Request request, CancellationToken cancellationToken = default)
+        public virtual async Task<Response> SendRequestAsync(Request request, CancellationToken cancellationToken = default)
         {
             return await _httpPipeline.SendRequestAsync(request, cancellationToken).ConfigureAwait(false);
         }

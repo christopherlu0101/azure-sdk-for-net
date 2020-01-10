@@ -10,13 +10,15 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             v2_0_preview = 1
         }
 
-        public FormRecognizerClientOptions(ServiceVersion version = LatestVersion)
+        public FormRecognizerClientOptions(ServiceVersion version = LatestVersion, bool includeTextDetails = false)
         {
             Version = version;
+            IncludeTextDetails = includeTextDetails;
         }
-
-        internal ServiceVersion Version { get; }
+        
         internal const ServiceVersion LatestVersion = ServiceVersion.v2_0_preview;
+        public bool IncludeTextDetails;
+        public ServiceVersion Version { get; }
 
         internal string GetVersionString()
         {

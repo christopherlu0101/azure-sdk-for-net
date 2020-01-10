@@ -1,23 +1,21 @@
-﻿using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer;
-using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models;
-using Xunit;
+﻿using Xunit;
 using System;
 using System.IO;
 using System.Text.Json;
+using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer;
 
 namespace FormRecognizerSDK.Tests
 {
     public class FormRecognizerTests
     {
-        [Fact]
-        public void test()
-        {
-            //var endpoint = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/prebuilt/receipt/analyze";
-            var endpoint = "https://westus2.ppe.cognitiveservices.azure.com";
-            var apiKey = "184654c847d54432b8301a4b76f63045";
-            var client = new FormRecognizerClient(new Uri(endpoint), apiKey);
+        private const string APIKEY = "184654c847d54432b8301a4b76f63045";
+        private static Uri _endpoint = new Uri("https://westus2.ppe.cognitiveservices.azure.com");
 
-            using (FileStream stream = new FileStream(@"D:/Data/Receipt_000_000.jpg", FileMode.Open))
+        [Fact]
+        public void AnalyzeReceipt_StreamContent()
+        {            
+            var client = new FormRecognizerClient(_endpoint, APIKEY, new FormRecognizerClientOptions { IncludeTextDetails = true});
+            using (FileStream stream = new FileStream(@"TestImages/Receipt_044_065.jpg", FileMode.Open))
             {
                 var operation = client.StartAnalyzeReceiptAsync(stream, ContentType.Jpeg).Result;
                 var result = operation.WaitForCompletionAsync().Result;
@@ -25,18 +23,17 @@ namespace FormRecognizerSDK.Tests
             }
         }
 
-        //[Fact]
-        //public void test2()
-        //{
-        //    //var endpoint = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/prebuilt/receipt/analyze";
-        //    var endpoint = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/";
-        //    var apiKey = "184654c847d54432b8301a4b76f63045";
-        //    var client = new FormRecognizerClient(endpoint, apiKey);
-        //    var id = client.StartAnalyzeReceiptAsync("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSAwPgac6wRJwk-bDoSjUsc5UXCMouwr0ICk2nVXNDqtRhvJA8t").Result;
-        //}
+        [Fact]
+        public void AnalyzeReceipt_UriContent()
+        {
+            var client = new FormRecognizerClient(_endpoint, APIKEY, new FormRecognizerClientOptions { IncludeTextDetails = true });
+            var operation = client.StartAnalyzeReceiptAsync(new Uri("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSAwPgac6wRJwk-bDoSjUsc5UXCMouwr0ICk2nVXNDqtRhvJA8t")).Result;
+            var result = operation.WaitForCompletionAsync().Result;
+            Console.WriteLine(result);            
+        }
 
         [Fact]
-        public void offlineTest()
+        public void Serialization()
         {
             var options = new JsonSerializerOptions
             {
@@ -44,9 +41,9 @@ namespace FormRecognizerSDK.Tests
                 IgnoreNullValues = true,
                 Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             };
-            var jsonString = File.ReadAllText(@"TestImages/json1.json");           
-            var a = FormRecognizerSerializer.Deserialize(jsonString, options);
-            var b = FormRecognizerSerializer.Serialize(a, options);
+            var jsonString = File.ReadAllText(@"TestImages/testJson.json");           
+            var obj = FormRecognizerSerializer.Deserialize(jsonString, options);
+            var json = FormRecognizerSerializer.Serialize(obj, options);
         }
     }
 }

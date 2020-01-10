@@ -29,12 +29,12 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
     {
         public static T Read<T>(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            var value = new T();
+            var value = Activator.CreateInstance(typeof(T));
             while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.EndObject)
                 {
-                    return value;
+                    return (T)value;
                 }
                 if (reader.TokenType != JsonTokenType.PropertyName)
                 {

@@ -23,6 +23,8 @@
     <Compile Include="$(AzureCoreSharedSources)ContentTypeUtilities.cs" />
     <Compile Include="$(AzureCoreSharedSources)ResponseExceptionExtensions.cs" />
     <Compile Include="$(AzureCoreSharedSources)OperationHelpers.cs" />
+    <Compile Include="$(AzureCoreSharedSources)DiagnosticScope.cs" />
+    <Compile Include="$(AzureCoreSharedSources)ClientDiagnostics.cs" />
   </ItemGroup>
 
   <ItemGroup>
