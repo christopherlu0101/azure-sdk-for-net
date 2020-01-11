@@ -3,10 +3,11 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
 {    
-    //[JsonConverter(typeof(FieldValueConverter))]
+    [JsonConverter(typeof(FieldValueConverter))]
     public class FieldValue
     {        
         public FieldValueType Type { get; set; }
@@ -25,38 +26,10 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
         public int? Page { get; set; }
     }
 
-    internal static class JsonConverterHelper
-    {
-        public static T Read<T>(ref Utf8JsonReader reader, JsonSerializerOptions options)
-        {
-            var value = Activator.CreateInstance(typeof(T));
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonTokenType.EndObject)
-                {
-                    return (T)value;
-                }
-                if (reader.TokenType != JsonTokenType.PropertyName)
-                {
-                    throw new JsonException();
-                }
-
-                string propertyName = reader.GetString();
-                // Hard code : assume camel naming.
-                var property = typeof(T).GetProperty(CasingHelper.ToUpperCamelCasing(propertyName));
-                if (property != null)
-                {
-                    var propertyValue = JsonSerializer.Deserialize(ref reader, property.PropertyType, options);
-                    property.SetValue(value, propertyValue);
-                }
-                // Ignore pass-in non-exist property.
-            }
-            throw new JsonException();
-        }
-    }
-
     public class FieldValueConverter : JsonConverter<FieldValue>
     {
+        private static IList<PropertyInfo> _properties = JsonConverterHelper.GetProperties(typeof(FieldValue));
+
         public override FieldValue Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             return JsonConverterHelper.Read<FieldValue>(ref reader, options);
@@ -66,19 +39,14 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
         public override void Write(Utf8JsonWriter writer, FieldValue fieldValue, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
-            writer.WritePropertyName(options.PropertyNamingPolicy.ConvertName("Type"));
-            JsonSerializer.Serialize(writer, fieldValue.Type, options);
-            foreach (var property in typeof(FieldValue).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            foreach (var property in _properties)
             {
-                System.Diagnostics.Debug.WriteLine(property.Name);
-
                 var propertyValue = property.GetValue(fieldValue);
                 if (propertyValue != null)
                 {
-                    if (!property.Name.Contains("Value") || property.Name == GetValuePropertyName(fieldValue.Type))
+                    if (!property.Name.StartsWith("Value") || property.Name == GetValuePropertyName(fieldValue.Type))
                     {
-                        // Hard code : assume camel naming.
-                        writer.WritePropertyName(CasingHelper.ToLowerCamelCasing(property.Name));
+                        writer.WritePropertyName(options.PropertyNamingPolicy.ConvertName(property.Name));
                         JsonSerializer.Serialize(writer, propertyValue, options);
                     }
                 }
