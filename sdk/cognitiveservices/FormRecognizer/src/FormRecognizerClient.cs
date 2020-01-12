@@ -42,13 +42,45 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         private readonly Uri _baseUri;        
         private readonly string _apiVersion;        
 
-        public FormRecognizerClient(Uri baseUri, string subscriptionKey, FormRecognizerClientOptions options = null)
+        public FormRecognizerClient(Uri baseUri, string subscriptionKey)
         {
+            Argument.AssertNotNull(baseUri, nameof(baseUri));
+            Argument.AssertNotNull(subscriptionKey, nameof(subscriptionKey));
+
             _subscriptionKey = subscriptionKey;
-            _options = options ?? new FormRecognizerClientOptions();
+            _options = new FormRecognizerClientOptions();
             _apiVersion = _options.GetVersionString();
             _baseUri = baseUri;
             _formRecognizerPipeline = new FormRecognizerHttpPipeline(_subscriptionKey, _options);
+            _clientDiagnostics = new ClientDiagnostics(_options);
+        }
+
+        public FormRecognizerClient(Uri baseUri, string subscriptionKey, FormRecognizerClientOptions options)
+        {
+            Argument.AssertNotNull(baseUri, nameof(baseUri));
+            Argument.AssertNotNull(subscriptionKey, nameof(subscriptionKey));
+            Argument.AssertNotNull(options, nameof(options));
+
+            _subscriptionKey = subscriptionKey;
+            _options = options;
+            _apiVersion = _options.GetVersionString();
+            _baseUri = baseUri;
+            _formRecognizerPipeline = new FormRecognizerHttpPipeline(_subscriptionKey, _options);
+            _clientDiagnostics = new ClientDiagnostics(options);
+        }
+
+        public FormRecognizerClient(Uri baseUri, string subscriptionKey, HttpPipeline httpPipeline, FormRecognizerClientOptions options)
+        {
+            Argument.AssertNotNull(baseUri, nameof(baseUri));
+            Argument.AssertNotNull(subscriptionKey, nameof(subscriptionKey));
+            Argument.AssertNotNull(httpPipeline, nameof(httpPipeline));
+            Argument.AssertNotNull(options, nameof(options));
+
+            _subscriptionKey = subscriptionKey;
+            _options = options;
+            _apiVersion = _options.GetVersionString();
+            _baseUri = baseUri;
+            _formRecognizerPipeline = new FormRecognizerHttpPipeline(_subscriptionKey, httpPipeline);
             _clientDiagnostics = new ClientDiagnostics(options);
         }
 

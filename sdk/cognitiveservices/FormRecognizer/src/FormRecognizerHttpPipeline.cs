@@ -17,6 +17,12 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             _httpPipeline = HttpPipelineBuilder.Build(options);
         }
 
+        public FormRecognizerHttpPipeline(string subscriptionKey, HttpPipeline httpPipeline)
+        {
+            _subscriptionKey = subscriptionKey;
+            _httpPipeline = httpPipeline;
+        }
+
         public virtual Request CreateRequest()
         {
             Request request = _httpPipeline.CreateRequest();

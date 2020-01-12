@@ -13,9 +13,15 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 {
     public partial class FormRecognizerClient
     {
+        public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(Stream fileStream, ContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return StartAnalyzeReceiptAsync(fileStream, contentType, cancellationToken).Result;
+        }
+
         public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Stream fileStream, ContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.CognitiveServices.FormRecognizerClient.StartAnalyzeReceipt");
+            Argument.AssertNotNull(fileStream, nameof(fileStream));
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.CognitiveServices.FormRecognizer.StartAnalyzeReceipt");
             scope.Start();
             try
             {
@@ -31,9 +37,15 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             }
         }
 
+        public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(Uri imageUri, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return StartAnalyzeReceiptAsync(imageUri, cancellationToken).Result;
+        }
+
         public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Uri imageUri, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.CognitiveServices.FormRecognizerClient.StartAnalyzeReceipt");
+            Argument.AssertNotNull(imageUri, nameof(imageUri));
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.CognitiveServices.FormRecognizer.StartAnalyzeReceipt");
             scope.Start();
             try
             {
@@ -52,7 +64,18 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 
         public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(string locationId)
         {
-            return GetAnalyzeReceiptResult(new Uri(locationId));
+            Argument.AssertNotNull(locationId, nameof(locationId));
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.CognitiveServices.FormRecognizer.StartAnalyzeReceipt");
+            scope.Start();
+            try
+            {
+                return GetAnalyzeReceiptResult(new Uri(locationId));
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
         }
 
         private async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Request request, CancellationToken cancellationToken)
@@ -76,8 +99,8 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                         throw await response.CreateRequestFailedExceptionAsync("Invalid header : Operation-Location not found.");
                     }
                 default:
-                    throw await response.CreateRequestFailedExceptionAsync($"Bad request {response.Status}");
-            }
+                    throw await response.CreateRequestFailedExceptionAsync(null, $"{response.Status}");
+            }            
         }
 
         private Operation<AnalyzeResult> GetAnalyzeReceiptResult(Uri location)

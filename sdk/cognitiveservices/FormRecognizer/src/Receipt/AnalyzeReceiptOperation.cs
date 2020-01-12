@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure;
@@ -10,15 +8,6 @@ using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models;
 
 namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
 {
-    public enum OperationStatus
-    {
-        NotStarted,
-        Running,
-        Succeeded,
-        Cancelled,
-        Failed,
-    }
-
     public class AnalyzeReceiptOperation : Operation<AnalyzeResult>
     {
 
@@ -40,8 +29,6 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
         {
             _formRecognizerPipeline = formRecognizerPipeline;
             _request = request;
-            // Id should be Uri or Guid?
-            //_location = request.Uri.ToString().Split('/').Last();
             _location = request.Uri.ToString();
             _response = null;
             _value = null;
@@ -91,9 +78,10 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
                         // TODO: Can we deserialize JSON directly from stream?
                         _value = FormRecognizerSerializer.Deserialize(reader.ReadToEnd());
                     }
-                    return _value.Status == "succeeded";
+                    // TODO: should we use enum here?
+                    return (_value.Status != "notStarted" || _value.Status != "running");
                 default:
-                    return true;
+                    throw response.CreateRequestFailedException(null, $"{response.Status}");
             }
         }
     }

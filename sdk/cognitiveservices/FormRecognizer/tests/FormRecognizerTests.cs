@@ -12,7 +12,7 @@ namespace FormRecognizerSDK.Tests
         private static Uri _endpoint = new Uri("https://westus2.ppe.cognitiveservices.azure.com");
 
         [Fact]
-        public void AnalyzeReceipt_StreamContent()
+        public void AnalyzeReceipt_APIM_StreamContent()
         {            
             var client = new FormRecognizerClient(_endpoint, APIKEY, new FormRecognizerClientOptions { IncludeTextDetails = true});
             using (FileStream stream = new FileStream(@"TestImages/Receipt_044_065.jpg", FileMode.Open))
@@ -24,13 +24,33 @@ namespace FormRecognizerSDK.Tests
         }
 
         [Fact]
-        public void AnalyzeReceipt_UriContent()
+        public void AnalyzeReceipt_APIM_UriContent()
         {
             var client = new FormRecognizerClient(_endpoint, APIKEY, new FormRecognizerClientOptions { IncludeTextDetails = true });
             var operation = client.StartAnalyzeReceiptAsync(new Uri("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSAwPgac6wRJwk-bDoSjUsc5UXCMouwr0ICk2nVXNDqtRhvJA8t")).Result;
             var result = operation.WaitForCompletionAsync().Result;
             Console.WriteLine(result);            
         }
+
+        [Fact]
+        public void AnalyzeReceipt_APIM_expectedFail()
+        {
+            try
+            {
+                var client = new FormRecognizerClient(_endpoint, APIKEY, new FormRecognizerClientOptions { IncludeTextDetails = true });
+                using (FileStream stream = new FileStream(@"TestImages/Receipt_044_065.jpg", FileMode.Open))
+                {
+                    var operation = client.StartAnalyzeReceipt("https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/prebuilt/receipt/analyzeResults/not_exist_guid");
+                    var result = operation.WaitForCompletionAsync().Result;
+                }
+                throw new Exception("Expected fail somehow success.");
+            }
+            catch
+            {
+                
+            }
+        }
+
 
         [Fact]
         public void Serialization()

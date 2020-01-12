@@ -20,6 +20,7 @@
   <!-- Import the Azure.Core project -->
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\core\Azure.Core\src\Azure.Core.props" />
   <ItemGroup>
+    <Compile Include="$(AzureCoreSharedSources)Argument.cs" />
     <Compile Include="$(AzureCoreSharedSources)ContentTypeUtilities.cs" />
     <Compile Include="$(AzureCoreSharedSources)ResponseExceptionExtensions.cs" />
     <Compile Include="$(AzureCoreSharedSources)OperationHelpers.cs" />
