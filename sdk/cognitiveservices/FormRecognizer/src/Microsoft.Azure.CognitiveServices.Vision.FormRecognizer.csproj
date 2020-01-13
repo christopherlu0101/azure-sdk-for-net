@@ -1,34 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-  <AssemblyTitle>Microsoft Cognitive Services Form Recognizer SDK</AssemblyTitle>
-  <Description>This client library provides access to the Microsoft Cognitive Services Form Recognizer APIs.</Description>
-  <Version>1.0.0-preview.1</Version>
-  <PackageTags>FormRecognizer;Form Recognizer;</PackageTags>
-  <PackageReleaseNotes>
-    <![CDATA[
-    This is a public preview release of the Cognitive Services Form Recognizer SDK.
-    ]]>
-	</PackageReleaseNotes>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <IsClientLibrary>true</IsClientLibrary>
-  </PropertyGroup>  
-  
-  <ItemGroup>  
-    <PackageReference Include="System.Text.Json" />
-  </ItemGroup>
-
-  <!-- Import the Azure.Core project -->
-  <Import Project="$(MSBuildThisFileDirectory)..\..\..\core\Azure.Core\src\Azure.Core.props" />
-  <ItemGroup>
-    <Compile Include="$(AzureCoreSharedSources)Argument.cs" />
-    <Compile Include="$(AzureCoreSharedSources)ContentTypeUtilities.cs" />
-    <Compile Include="$(AzureCoreSharedSources)ResponseExceptionExtensions.cs" />
-    <Compile Include="$(AzureCoreSharedSources)OperationHelpers.cs" />
-    <Compile Include="$(AzureCoreSharedSources)DiagnosticScope.cs" />
-    <Compile Include="$(AzureCoreSharedSources)ClientDiagnostics.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>  
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
 </Project>

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Text.Json.Serialization;
@@ -6,20 +6,17 @@ using System.Text.Json.Serialization;
 namespace Azure.AI.FormRecognizer.Models
 {
     /// <summary>
-    /// Semantic data type of the field value.
+    /// Status of the queued operation.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum FieldValueType
+    public enum OperationStatus
     {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-        Date,
-        String,
-        Time,
-        PhoneNumber,
-        Number,
-        Integer,
-        Array,
-        Object
+        NotStarted,
+        Running,
+        Succeeded,
+        Failed
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     }
+
 }

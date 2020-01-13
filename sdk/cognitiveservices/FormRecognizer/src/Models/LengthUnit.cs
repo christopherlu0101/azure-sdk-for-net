@@ -1,31 +1,19 @@
-﻿using System;
-using System.Text.Json;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 using System.Text.Json.Serialization;
 
-namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
+namespace Azure.AI.FormRecognizer.Models
 {
-    [JsonConverter(typeof(LengthUnitConverter))]
+    /// <summary>
+    /// Length unit.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum LengthUnit
     {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         Pixel,
         Inch
-    }
-
-    public class LengthUnitConverter : JsonConverter<LengthUnit>
-    {
-        public override LengthUnit Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (reader.TokenType == JsonTokenType.String)
-            {
-                Enum.TryParse(reader.GetString(), true, out LengthUnit lengthUnit);
-                return lengthUnit;
-            }
-            throw new JsonException();
-        }
-
-        public override void Write(Utf8JsonWriter writer, LengthUnit lengthUnit, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(CasingHelper.ToLowerCamelCasing(lengthUnit.ToString()));
-        }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     }
 }

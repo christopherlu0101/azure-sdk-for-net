@@ -1,25 +1,44 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using Azure.Core;
 
-namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
+namespace Azure.AI.FormRecognizer
 {
+    /// <summary>
+    /// FormRecognizerClient advanced options
+    /// </summary>
     public class FormRecognizerClientOptions : ClientOptions
     {
+        /// <summary>
+        /// All FormRecognizer API version
+        /// </summary>
         public enum ServiceVersion
         {
+#pragma warning disable CA1707 // Identifiers should not contain underscores
+            /// <summary>
+            /// v2.0-preview
+            /// </summary>
             v2_0_preview = 1
+#pragma warning restore CA1707 // Identifiers should not contain underscores
         }
 
-        public FormRecognizerClientOptions(ServiceVersion version = LatestVersion, bool includeTextDetails = false)
+        /// <summary>
+        /// Constructor for FormRecognizerClientOptions
+        /// </summary>
+        /// <param name="version"></param>
+        public FormRecognizerClientOptions(ServiceVersion version = LatestVersion)
         {
             Version = version;
-            IncludeTextDetails = includeTextDetails;
         }
-        
-        internal const ServiceVersion LatestVersion = ServiceVersion.v2_0_preview;
-        public bool IncludeTextDetails;
+
+        /// <summary>
+        /// FormRecognizer API version current client using.
+        /// </summary>
         public ServiceVersion Version { get; }
 
+        internal const ServiceVersion LatestVersion = ServiceVersion.v2_0_preview;
         internal string GetVersionString()
         {
             switch (Version)

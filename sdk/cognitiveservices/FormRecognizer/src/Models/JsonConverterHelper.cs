@@ -1,10 +1,13 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
+namespace Azure.AI.FormRecognizer.Models
 {
     internal static class JsonConverterHelper
     {

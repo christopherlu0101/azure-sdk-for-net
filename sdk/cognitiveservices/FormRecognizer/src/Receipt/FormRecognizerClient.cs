@@ -1,34 +1,58 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.IO;
+using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
 using System.Text.Json;
-using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
-using Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models;
+using Azure.AI.FormRecognizer.Models;
 
-namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
+namespace Azure.AI.FormRecognizer
 {
     public partial class FormRecognizerClient
     {
-        public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(Stream fileStream, ContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+        /// Start analyze receipt by stream content.
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="contentType"></param>
+        /// <param name="includeTextDetails"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(Stream content, ContentType contentType, bool includeTextDetails = false, CancellationToken cancellationToken = default)
         {
-            return StartAnalyzeReceiptAsync(fileStream, contentType, cancellationToken).Result;
+            return StartAnalyzeReceiptAsync(content, contentType, includeTextDetails, cancellationToken).Result;
         }
 
-        public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Stream fileStream, ContentType contentType, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+        /// Asynchronous start analyze receipt by stream content.
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="contentType"></param>
+        /// <param name="includeTextDetails"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Stream content, ContentType contentType, bool includeTextDetails = false, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(fileStream, nameof(fileStream));
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.CognitiveServices.FormRecognizer.StartAnalyzeReceipt");
+            // TODO: Do we want to support auto-detecting content type?
+            // TODO: Validate fileStream format consistency with contentType.
+            Argument.AssertNotNull(content, nameof(content));
+            Argument.AssertNotNull(contentType, nameof(contentType));
+
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.FormRecognizer.FormRecognizerClient.StartAnalyzeReceipt");
+            scope.AddAttribute("contentType", contentType.MediaType);
             scope.Start();
             try
             {
-                var request = _formRecognizerPipeline.CreateRequest();
-                ProcessContentType(request, contentType);
-                request.Content = RequestContent.Create(fileStream);
-                return await StartAnalyzeReceiptAsync(request, cancellationToken);
+                using var request = _formRecognizerPipeline.CreateAnalyzeReceiptRequest(includeTextDetails);
+                request.Headers.Add("Content-Type", contentType.MediaType);
+                request.Content = RequestContent.Create(content);
+                return await StartAnalyzeDocumentAsync(request, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -37,23 +61,40 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             }
         }
 
-        public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(Uri imageUri, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+        /// Start analyze receipt by content uri
+        /// </summary>
+        /// <param name="contentUri"></param>
+        /// <param name="includeTextDetails"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(Uri contentUri, bool includeTextDetails = false, CancellationToken cancellationToken = default)
         {
-            return StartAnalyzeReceiptAsync(imageUri, cancellationToken).Result;
+            return StartAnalyzeReceiptAsync(contentUri, includeTextDetails, cancellationToken).Result;
         }
 
-        public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Uri imageUri, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+        /// Asynchronous start analyze receipt by content uri
+        /// </summary>
+        /// <param name="contentUri"></param>
+        /// <param name="includeTextDetails"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Uri contentUri, bool includeTextDetails = false, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(imageUri, nameof(imageUri));
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.CognitiveServices.FormRecognizer.StartAnalyzeReceipt");
+            Argument.AssertNotNull(contentUri, nameof(contentUri));
+
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.FormRecognizer.FormRecognizerClient.StartAnalyzeReceipt");
+            scope.AddAttribute("uri", contentUri);
             scope.Start();
             try
             {
-                var request = _formRecognizerPipeline.CreateRequest();
-                ProcessContentType(request, ContentType.Json);
-                var jsonString = JsonSerializer.Serialize<AnalyzeUrlRequest>(new AnalyzeUrlRequest() { source = imageUri });
-                request.Content = RequestContent.Create(Encoding.UTF8.GetBytes(jsonString));
-                return await StartAnalyzeReceiptAsync(request, cancellationToken);
+                using var request = _formRecognizerPipeline.CreateAnalyzeReceiptRequest(includeTextDetails);
+                // TODO: Factor serialization options
+                var requestJson = JsonSerializer.Serialize(new AnalyzeRequest() { Source = contentUri }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
+                request.Headers.Add("Content-Type", "application/json");
+                request.Content = RequestContent.Create(Encoding.UTF8.GetBytes(requestJson));
+                return await StartAnalyzeDocumentAsync(request, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -62,65 +103,26 @@ namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer
             }
         }
 
-        public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(string locationId)
+        /// <summary>
+        /// Start analyze receipt by an existed operation Location.
+        /// </summary>
+        /// <param name="operationLocation"></param>
+        /// <returns></returns>
+        public virtual Operation<AnalyzeResult> StartAnalyzeReceipt(string operationLocation)
         {
-            Argument.AssertNotNull(locationId, nameof(locationId));
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.CognitiveServices.FormRecognizer.StartAnalyzeReceipt");
+            Argument.AssertNotNull(operationLocation, nameof(operationLocation));
+
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope("Azure.AI.FormRecognizer.FormRecognizerClient.StartAnalyzeReceipt");
+            scope.AddAttribute("operationLocation", operationLocation);
             scope.Start();
             try
             {
-                return GetAnalyzeReceiptResult(new Uri(locationId));
+                return GetAnalyzeDocumentResult(new Uri(operationLocation));
             }
             catch (Exception e)
             {
                 scope.Failed(e);
                 throw;
-            }
-        }
-
-        private async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(Request request, CancellationToken cancellationToken)
-        {
-            request.Method = RequestMethod.Post;
-            ProcessAnalyzeReceiptUri(request, RouteNameScope.AnalyzeReceiptRoute);
-            var response = await _formRecognizerPipeline.SendRequestAsync(request, cancellationToken);
-            switch (response.Status)
-            {
-                // See LRO implementation.
-                // - https://github.com/Azure/azure-sdk-for-net/blob/0be76a78b6e8cb86f1316d158fa63b3595763f64/sdk/keyvault/Azure.Security.KeyVault.Keys/src/DeleteKeyOperation.cs
-                // - https://github.com/Azure/azure-sdk-for-net/blob/0be76a78b6e8cb86f1316d158fa63b3595763f64/sdk/keyvault/Azure.Security.KeyVault.Keys/src/KeyClient.cs#L557
-
-                case 202:
-                    if (response.Headers.TryGetValue("Operation-Location", out string locationUri))
-                    {
-                        return GetAnalyzeReceiptResult(new Uri(locationUri));
-                    }
-                    else
-                    {
-                        throw await response.CreateRequestFailedExceptionAsync("Invalid header : Operation-Location not found.");
-                    }
-                default:
-                    throw await response.CreateRequestFailedExceptionAsync(null, $"{response.Status}");
-            }            
-        }
-
-        private Operation<AnalyzeResult> GetAnalyzeReceiptResult(Uri location)
-        {
-            var getResultRequest = _formRecognizerPipeline.CreateRequest();
-            getResultRequest.Uri.Reset(location);
-            getResultRequest.Method = RequestMethod.Get;
-            return new AnalyzeReceiptOperation(_formRecognizerPipeline, getResultRequest);
-        }
-
-        private void ProcessAnalyzeReceiptUri(Request request, string uriRoute)
-        {
-            request.Uri.Reset(_baseUri);
-            request.Uri.AppendPath(RouteNameScope.FormRecognizerRoute, escape: false);
-            request.Uri.AppendPath(_apiVersion, escape: false);
-            request.Uri.AppendPath(uriRoute, escape: false);
-
-            if (_options.IncludeTextDetails)
-            {
-                request.Uri.AppendQuery("includeTextDetails", "true");
             }
         }
     }

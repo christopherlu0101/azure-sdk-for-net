@@ -1,15 +1,28 @@
-using Microsoft.Rest;
-using Newtonsoft.Json;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
-namespace Microsoft.Azure.CognitiveServices.Vision.FormRecognizer.Models
+using System.Collections.Generic;
+
+namespace Azure.AI.FormRecognizer.Models
 {
+    /// <summary>
+    /// A set of extracted fields corresponding to the input document.
+    /// </summary>
     public class DocumentResult
     {
+        /// <summary>
+        /// Document type.
+        /// </summary>
         public string DocType { get; set; }
+
+        /// <summary>
+        /// First and last page number where the document is found.
+        /// </summary>
         public IList<int> PageRange { get; set; }
+
+        /// <summary>
+        /// Dictionary of named field values.
+        /// </summary>
         public IDictionary<string, FieldValue> Fields { get; set; }
     }
 }
