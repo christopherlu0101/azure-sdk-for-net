@@ -11,6 +11,17 @@ namespace Azure.AI.FormRecognizer.Models
 {
     internal static class JsonConverterHelper
     {
+
+        public static Type _ignoreAttribute = typeof(IgnoreDefaultAttribute);
+        public static JsonNamingPolicy _defaultNamingPolicy = JsonNamingPolicy.CamelCase;
+        public static JsonSerializerOptions _defaultOptions = new JsonSerializerOptions
+        {
+            // UnsafeRelaxedJsonEscaping will maintain "+123" instead of something like "/00u.."
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            IgnoreNullValues = true
+        };
+
         public static T Read<T>(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
             var value = Activator.CreateInstance(typeof(T));
@@ -36,6 +47,26 @@ namespace Azure.AI.FormRecognizer.Models
                 // Ignore pass-in non-exist property.
             }
             throw new JsonException();
+        }
+
+        public static void Write<T>(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+            foreach (var property in GetProperties(typeof(T)))
+            {
+                var propertyValue = property.GetValue(value);
+                if (propertyValue != null)
+                {
+                    var attr = property.GetCustomAttribute(_ignoreAttribute);
+                    if (attr == null || !((IgnoreDefaultAttribute)attr).IsDefault(propertyValue))
+                    {
+                        var namingPolicy = options.PropertyNamingPolicy ?? _defaultNamingPolicy;
+                        writer.WritePropertyName(namingPolicy.ConvertName(property.Name));
+                        JsonSerializer.Serialize(writer, propertyValue, options);
+                    }
+                }
+            }
+            writer.WriteEndObject();
         }
 
         public static IList<PropertyInfo> GetProperties(Type type)

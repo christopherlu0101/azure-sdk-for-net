@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Azure.AI.FormRecognizer;
 
 namespace Azure.AI.FormRecognizer.Models
 {
@@ -84,6 +83,7 @@ namespace Azure.AI.FormRecognizer.Models
         /// <summary>
         /// The 1-based page number in the input document.
         /// </summary>
+        [IgnoreDefault(default(int))]
         public int Page { get; set; }
     }
 
@@ -92,7 +92,6 @@ namespace Azure.AI.FormRecognizer.Models
 #pragma warning restore SA1402 // File may only contain a single type
     {
         private static IList<PropertyInfo> _properties = JsonConverterHelper.GetProperties(typeof(FieldValue));
-
         public override FieldValue Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             return JsonConverterHelper.Read<FieldValue>(ref reader, options);
@@ -108,8 +107,13 @@ namespace Azure.AI.FormRecognizer.Models
                 {
                     if (!property.Name.StartsWith("Value", StringComparison.Ordinal) || property.Name == GetValuePropertyName(fieldValue.Type))
                     {
-                        writer.WritePropertyName(options.PropertyNamingPolicy.ConvertName(property.Name));
-                        JsonSerializer.Serialize(writer, propertyValue, options);
+                        var attr = property.GetCustomAttribute(JsonConverterHelper._ignoreAttribute);
+                        if (attr == null || !((IgnoreDefaultAttribute)attr).IsDefault(propertyValue))
+                        {
+                            var namingPolicy = options.PropertyNamingPolicy ?? JsonConverterHelper._defaultNamingPolicy;
+                            writer.WritePropertyName(namingPolicy.ConvertName(property.Name));
+                            JsonSerializer.Serialize(writer, propertyValue, options);
+                        }
                     }
                 }
             }
@@ -142,5 +146,4 @@ namespace Azure.AI.FormRecognizer.Models
             }
         }
     }
-
 }

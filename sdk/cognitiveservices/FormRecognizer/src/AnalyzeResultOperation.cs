@@ -84,7 +84,7 @@ namespace Azure.AI.FormRecognizer
                 case 200:
                     {
                         using var reader = new StreamReader(response.ContentStream);
-                        _operationResult = JsonSerializer.Deserialize<AnalyzeOperationResult>(reader.ReadToEnd(), FormRecognizerSerializer._defaultOptions);
+                        _operationResult = JsonSerializer.Deserialize<AnalyzeOperationResult>(reader.ReadToEnd(), JsonConverterHelper._defaultOptions);
                         return (_operationResult.Status != OperationStatus.NotStarted && _operationResult.Status != OperationStatus.Running);
                     }
                 default:

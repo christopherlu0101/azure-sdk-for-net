@@ -14,6 +14,13 @@ namespace FormRecognizerSDK.Tests
     {
         private const string APIKEY = "184654c847d54432b8301a4b76f63045";
         private static Uri _endpoint = new Uri("https://westus2.ppe.cognitiveservices.azure.com");
+        private static JsonSerializerOptions _defaultOptions = new JsonSerializerOptions
+        {
+            // UnsafeRelaxedJsonEscaping will maintain "+123" instead of something like "/00u.."
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            IgnoreNullValues = true
+        };
 
         [Fact]
         public void AnalyzeReceipt_APIM_StreamContent()
@@ -24,6 +31,7 @@ namespace FormRecognizerSDK.Tests
                 var contentType = new System.Net.Mime.ContentType { MediaType = System.Net.Mime.MediaTypeNames.Image.Jpeg };
                 var operation = client.StartAnalyzeReceiptAsync(stream, contentType, true).Result;
                 var result = operation.WaitForCompletionAsync().Result;
+                var resultString = JsonSerializer.Serialize(result.Value, _defaultOptions);
                 Assert.True(result.Value != null);
             }
         }
