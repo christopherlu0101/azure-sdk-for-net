@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Azure.AI.FormRecognizer.Models
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    internal class IgnoreDefaultAttribute : System.Attribute
+    internal class IgnoreDefaultAttribute : BaseCustomAttribute
     {
         private int? _intValue = null;
         private double? _doubleValue = null;
@@ -18,15 +19,16 @@ namespace Azure.AI.FormRecognizer.Models
             _doubleValue = value;
         }
 
-        public bool IsDefault(object value)
+        public override bool ShouldSerialize(PropertyInfo propertyInfo, object obj)
         {
+            var value = propertyInfo.GetValue(obj);
             if (_intValue != null)
             {
-                return (_intValue.Value == (int)value);
+                return (_intValue.Value != (int)value);
             }
             else if (_doubleValue != null)
             {
-                return (_doubleValue.Value == (double)value);
+                return (_doubleValue.Value != (double)value);
             }
             else
             {

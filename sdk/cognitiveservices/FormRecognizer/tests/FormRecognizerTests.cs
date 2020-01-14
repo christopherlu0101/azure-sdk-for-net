@@ -42,6 +42,7 @@ namespace FormRecognizerSDK.Tests
             var client = new FormRecognizerClient(_endpoint, APIKEY);
             var operation = client.StartAnalyzeReceiptAsync(new Uri("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSAwPgac6wRJwk-bDoSjUsc5UXCMouwr0ICk2nVXNDqtRhvJA8t"), true).Result;
             var result = operation.WaitForCompletionAsync().Result;
+            var resultString = JsonSerializer.Serialize(result.Value, _defaultOptions);
             Assert.True(result.Value != null);
         }
 

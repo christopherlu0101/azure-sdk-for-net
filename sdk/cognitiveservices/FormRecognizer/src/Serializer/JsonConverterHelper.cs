@@ -57,8 +57,8 @@ namespace Azure.AI.FormRecognizer.Models
                 var propertyValue = property.GetValue(value);
                 if (propertyValue != null)
                 {
-                    var attr = property.GetCustomAttribute(_ignoreAttribute);
-                    if (attr == null || !((IgnoreDefaultAttribute)attr).IsDefault(propertyValue))
+                    var attrs = property.GetCustomAttributes().ToArray();
+                    if (attrs.Length == 0 || attrs.All(attr => ((BaseCustomAttribute)attr).ShouldSerialize(property, value)))
                     {
                         var namingPolicy = options.PropertyNamingPolicy ?? _defaultNamingPolicy;
                         writer.WritePropertyName(namingPolicy.ConvertName(property.Name));
