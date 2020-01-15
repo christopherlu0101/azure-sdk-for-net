@@ -125,5 +125,16 @@ namespace Azure.AI.FormRecognizer
                 throw;
             }
         }
+
+
+        /// <summary>
+        /// Asynchronous start analyze receipt by an existed operation Location.
+        /// </summary>
+        /// <param name="operationLocation"></param>
+        /// <returns></returns>
+        public virtual async Task<Operation<AnalyzeResult>> StartAnalyzeReceiptAsync(string operationLocation)
+        {
+            return await Task.Run(() => StartAnalyzeReceipt(operationLocation)).ConfigureAwait(false);
+        }
     }
 }

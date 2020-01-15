@@ -6,13 +6,14 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Collections.Concurrent;
 
 namespace Azure.AI.FormRecognizer.Models
 {
     internal static class JsonConverterHelper
     {
+        private static ConcurrentDictionary<Type, List<PropertyInfo>> _propertiesInfoCache;
 
-        public static Type _ignoreAttribute = typeof(IgnoreDefaultAttribute);
         public static JsonNamingPolicy _defaultNamingPolicy = JsonNamingPolicy.CamelCase;
         public static JsonSerializerOptions _defaultOptions = new JsonSerializerOptions
         {
@@ -21,6 +22,11 @@ namespace Azure.AI.FormRecognizer.Models
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             IgnoreNullValues = true
         };
+
+        static JsonConverterHelper()
+        {
+            _propertiesInfoCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
+        }
 
         public static T Read<T>(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
@@ -69,11 +75,19 @@ namespace Azure.AI.FormRecognizer.Models
             writer.WriteEndObject();
         }
 
-        public static IList<PropertyInfo> GetProperties(Type type)
+        private static IList<PropertyInfo> GetProperties(Type type)
         {
-            return type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                .OrderBy(property => property.MetadataToken).ToArray();
+            if (_propertiesInfoCache.TryGetValue(type, out List<PropertyInfo> cacheProperties))
+            {
+                return cacheProperties;
+            }
+            else
+            {
+                var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .OrderBy(property => property.MetadataToken).ToList();
+                _propertiesInfoCache.TryAdd(type, properties);
+                return properties;
+            }
         }
     }
-
 }

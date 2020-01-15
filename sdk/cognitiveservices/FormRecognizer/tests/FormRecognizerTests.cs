@@ -47,6 +47,17 @@ namespace FormRecognizerSDK.Tests
         }
 
         [Fact]
+        public void AnalyzeReceipt_APIM_operationId()
+        {
+            var client = new FormRecognizerClient(_endpoint, APIKEY);
+            var operationId = "https://westus2.ppe.cognitiveservices.azure.com/formrecognizer/v2.0-preview/prebuilt/receipt/analyzeResults/5673c728-dcb7-47ec-8da3-80416a30b8f3";
+            var operation = client.StartAnalyzeReceiptAsync(operationId).Result;
+            var result = operation.WaitForCompletionAsync().Result;
+            var resultString = JsonSerializer.Serialize(result.Value, _defaultOptions);
+            Assert.True(result.Value != null);
+        }
+
+        [Fact]
         public void AnalyzeReceipt_APIM_expectedFail()
         {
             try
